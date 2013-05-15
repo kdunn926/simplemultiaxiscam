@@ -71,8 +71,9 @@ public class GCodePanel extends JPanel {
 			FileWriter outfile = new FileWriter("/tmp/out.gcode");
 			try {
 				GCodeWriterStrategy out = new GCodeWriterStrategy(outfile) {
-					protected void writeCodeLine(final String s) throws IOException {
-						super.writeCodeLine(s);
+					@Override
+					protected void writeCodeLine(final String s, final double[] location) throws IOException {
+						super.writeCodeLine(s, location);
 						codeListModel.addElement(s);
 					}
 				};
