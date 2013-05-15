@@ -1,5 +1,6 @@
 package biz.wolschon.cam.multiaxis.trigonometry;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 
@@ -31,11 +32,23 @@ public enum Axis {
 		public double get(Vector3D v) {
 			throw new IllegalStateException("Vector3D has no A axis");
 		}
+
+		@Override
+		public Rotation getRotation(double degrees) {
+			Rotation rot = new Rotation(new Vector3D(1d,0d,0d), degrees);
+			return rot;
+		}
 	},
 	B(Y) {
 		@Override
 		public double get(Vector3D v) {
 			throw new IllegalStateException("Vector3D has no B axis");
+		}
+
+		@Override
+		public Rotation getRotation(double degrees) {
+			Rotation rot = new Rotation(new Vector3D(0d,1d,0d), degrees);
+			return rot;
 		}
 	};
 	private boolean isLinearAxis;
@@ -69,4 +82,7 @@ public enum Axis {
 		return new Axis[] {X,Y};
 	}
 	public abstract double get(Vector3D vector3d);
+	public Rotation getRotation(double degrees) {
+		throw new IllegalStateException("not defined for linear axis");
+	}
 }

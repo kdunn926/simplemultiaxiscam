@@ -3,6 +3,7 @@ package biz.wolschon.cam.multiaxis.strategy;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import biz.wolschon.cam.multiaxis.model.Collision;
@@ -45,6 +46,8 @@ public class StraightZCutStrategy implements IStrategy {
 		//TODO: support more then just locations in Y+A
 		startLocation[mFreeAxis.ordinal()] = 0; // center of rotation
 		Vector3D direction = new Vector3D(0d,0d,-1d); //TODO: calculate from the value of the A axis
+		Rotation rotA = Axis.A.getRotation(startLocation[Axis.A.ordinal()]);
+		direction = rotA.applyInverseTo(direction);
 		List<Collision> collisions = getModel().getCollisions(new Vector3D(startLocation[0], startLocation[1], startLocation[2]), direction);
 		if (collisions.size() == 0) {
 			System.out.println("hole detected at " + startLocation[0] + ", " + startLocation[1] + ", " + startLocation[2] + ", " + startLocation[3]);
