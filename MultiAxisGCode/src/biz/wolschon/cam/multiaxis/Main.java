@@ -53,9 +53,9 @@ public class Main implements Wizard1Loader.Listener {
 			IStrategy cutStrategy = new FollowSurfaceNormalCutStrategy(model, Axis.X, out);
 			IStrategy collisionStrategy = new StraightZCutStrategy(model, Axis.X, cutStrategy);
 
-			IStrategy aroundAAxis = new LinearStrategy(model, Axis.A, 90d, collisionStrategy);
+			IStrategy aroundAAxis = new LinearStrategy(model, Axis.A, 10d, collisionStrategy);
 
-			LinearStrategy alongYAxis = new LinearStrategy(model, Axis.Y, 5.1d, aroundAAxis);
+			LinearStrategy alongYAxis = new LinearStrategy(model, Axis.Y, 1.1d, aroundAAxis);
 			double[] startLocation = new double[] {
 					model.getCenterX(),
 					model.getMinY(),
