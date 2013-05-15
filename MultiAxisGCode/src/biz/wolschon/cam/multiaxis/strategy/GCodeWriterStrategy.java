@@ -19,10 +19,14 @@ public class GCodeWriterStrategy implements IStrategy {
 		sb.append(" Z").append(Double.toString(startLocation[2]));
 		sb.append(" A").append(Double.toString(startLocation[3]));
 		sb.append("\n");
-		out.write(sb.toString());
+		writeCodeLine(sb.toString());
 		
 		System.out.print(sb.toString()); //TODO: debug
 		
+	}
+	
+	protected void writeCodeLine(final String s) throws IOException {
+		out.write(s);
 	}
 
 }

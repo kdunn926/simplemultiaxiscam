@@ -60,7 +60,7 @@ public class MainFrame extends JFrame {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 		tabbedPane.addTab("Review Model", new ModelReviewPanel(model));
-		tabbedPane.addTab("TODO", new JPanel());
+		tabbedPane.addTab("Generate G-Code", new GCodePanel(model));
 	}
 
 }
