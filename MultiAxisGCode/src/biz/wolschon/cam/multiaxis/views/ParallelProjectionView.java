@@ -15,6 +15,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
+import java.io.Serializable;
+
 import javax.swing.JPanel;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -23,6 +25,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  * Panel that shows a parallel projection of a model and a tool.
  */
 public class ParallelProjectionView extends JPanel {
+	/**
+	 * For {@link Serializable}.
+	 */
+	private static final long serialVersionUID = 6952384291024398143L;
 	/**
 	 * The model we display.
 	 */
@@ -95,7 +101,7 @@ public class ParallelProjectionView extends JPanel {
 	 */
 	
 	@Override
-	public void paintAll(Graphics g) {
+	public void paintComponent(Graphics g) {
 		if (mDoubleBuffer == null ||
 		    mDoubleBuffer.getWidth() != getWidth() ||
 		    mDoubleBuffer.getHeight() != getHeight()) {
@@ -110,16 +116,16 @@ public class ParallelProjectionView extends JPanel {
 	 */
 	private void paintToBuffer(final Graphics2D g) {
 		// fill background
-		g.setColor(Color.WHITE);
+		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		// draw mesh
-		double horizontalScale = getWidth() * (mHorizontalMax - mHorizontalMin);
-		double verticalScale = getWidth() * (mHorizontalMax - mHorizontalMin);
+		double horizontalScale = getWidth() / (mHorizontalMax - mHorizontalMin);
+		double verticalScale = getHeight() / (mVerticalMax - mVerticalMin);
 		double scale = Math.min(horizontalScale, verticalScale);
 		//TODO: draw mesh
 		int count = mModel.getTriangleCount();
-		g.setColor(Color.GRAY);
+		g.setColor(Color.WHITE);
 		for(int i=0; i<count; i++) {
 			// project the 3 vertices of the triangle onto the screen
 			// the model always has A=0 and B=0 coordinates
@@ -127,7 +133,10 @@ public class ParallelProjectionView extends JPanel {
 			int[] project0 = projectPoint3D(triangle.getP1(), scale);
 			int[] project1 = projectPoint3D(triangle.getP2(), scale);
 			int[] project2 = projectPoint3D(triangle.getP3(), scale);
-
+/*System.out.println("painting triangle #" + i + " at "
+		+ project0[0] + ":" + project0[1] + " - "
+		+ project1[0] + ":" + project1[1] + " - "
+		+ project2[0] + ":" + project2[1] + " - ");*/
 			//TODO: allow solid in addition to wireframe
 			g.drawLine(project0[0], project0[1], project1[0], project1[1]);
 			g.drawLine(project1[0], project1[1], project2[0], project2[1]);
