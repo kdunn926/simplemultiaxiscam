@@ -53,7 +53,7 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 		//TODO: do inverse kinematic using the surface normal at aCollision
 		Triangle polygon = aCollision.getCollidingPolygon();
 		Vector3D normal	 = polygon.getNormal();
-		Vector3D point   = aCollision.getCollisionPoint(); 
+		//Vector3D point   = aCollision.getCollisionPoint(); 
 
 		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
 		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, mTool);

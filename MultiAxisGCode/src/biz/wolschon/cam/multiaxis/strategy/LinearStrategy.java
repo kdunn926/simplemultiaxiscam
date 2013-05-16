@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
@@ -37,8 +38,7 @@ public class LinearStrategy implements IStrategy {
 
 	@Override
 	public void runStrategy(final double aStartLocation[]) throws IOException {
-		double[] currentLocation = new double[aStartLocation.length];
-		System.arraycopy(aStartLocation, 0, currentLocation, 0, aStartLocation.length);
+		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
 		double current = aStartLocation[mAxis.ordinal()];
 		double max = mModel.getMax(mAxis);
 		while (current < max) {

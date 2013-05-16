@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
@@ -39,7 +40,7 @@ public class GCodePanel extends JPanel {
 		private double[] mToolLocation;
 		public GCodeLine (final String aLine, final double[] aToolLocation) {
 			this.mLine = aLine;
-			this.mToolLocation = aToolLocation;
+			this.mToolLocation = Arrays.copyOf(aToolLocation, aToolLocation.length);
 		}
 		public double[] getToolLocation() {
 			return mToolLocation;
@@ -108,6 +109,7 @@ public class GCodePanel extends JPanel {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				GCodeLine line = (GCodeLine) codeList.getSelectedValue();
+				System.out.println("selected: '" + line + "' " + Arrays.toString(line.getToolLocation()));
 				mReviewTab.setTool(mTool);
 				mReviewTab.setToolLocation(line.getToolLocation());
 				

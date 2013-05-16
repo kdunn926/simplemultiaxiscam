@@ -146,7 +146,7 @@ public class Trigonometry {
 			Axis[] plane = rotationAxis.getRotationPlane();
 			double oldHeight =  machinePosition[plane[0].ordinal()];
 			double oldWidth =  machinePosition[plane[1].ordinal()];
-			double angle = getRotationAngle(tool, rotationAxis);
+			double angle = -1 * getRotationAngle(tool, rotationAxis);
 			double rotated[] = rotate2D(oldHeight, oldWidth, angle);
 			machinePosition[plane[0].ordinal()] = rotated[0]; 
 			machinePosition[plane[1].ordinal()] = rotated[1];

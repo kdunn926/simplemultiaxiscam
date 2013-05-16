@@ -100,7 +100,7 @@ public class ParallelProjectionView extends JPanel {
 		this.mVerticalMin = mModel.getMin(this.mAxisVertical);
 		this.mVerticalMax = mModel.getMax(this.mAxisVertical);	
 		this.mDoubleBuffer = null;
-		repaint();	
+		updateUI();	
 	}
 
 	public void setHorizontalAxis(final Axis a) {
@@ -111,7 +111,7 @@ public class ParallelProjectionView extends JPanel {
 		this.mHorizontalMin = mModel.getMin(this.mAxisHorizontal);
 		this.mHorizontalMax = mModel.getMax(this.mAxisHorizontal);		
 		this.mDoubleBuffer = null;
-		repaint();
+		updateUI();
 	}
 
 	/**
@@ -135,14 +135,14 @@ public class ParallelProjectionView extends JPanel {
 				// draw tool on top of wireframe
 				if (shape instanceof BallShape) {
 					BallShape ball = (BallShape) shape;
-					int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius());
+					int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius(), true);
 					//TODO: allow solid in addition to wireframe
 					int d = (int) ( ball.getDiameter() * scale);
 					g.drawOval(center[0] - d/2, center[1] - d/2, d, d);
 				} else if (shape instanceof CylinderShape) {
 					CylinderShape cyl = (CylinderShape) shape;
-					int[] low = projectPoint5D(mToolLocation, cyl.getLocation());
-					int[] high = projectPoint5D(mToolLocation, cyl.getLocation() + cyl.getLength());
+					int[] low = projectPoint5D(mToolLocation, cyl.getLocation(), true);
+					int[] high = projectPoint5D(mToolLocation, cyl.getLocation() + cyl.getLength(), true);
 					//TODO: allow solid in addition to wireframe
 					g.drawLine(low[0], low[1], high[0], high[1]);
 				} else {
@@ -186,6 +186,28 @@ public class ParallelProjectionView extends JPanel {
 			g.drawLine(project2[0], project2[1], project0[0], project0[1]);
 		}
 
+		drawAxisNames(g);
+	}
+
+	private void drawAxisNames(final Graphics2D g) {
+		g.setColor(Color.WHITE);
+		g.drawChars(mAxisVertical.toString().toCharArray(), 0, 1, 10, 10);
+		g.drawLine(5,  5,  5,  20);
+		g.drawLine(5,  5,  7,  7);
+		g.drawLine(5,  5,  3,  7);
+
+		g.drawChars(mAxisHorizontal.toString().toCharArray(), 0, 1, 20, 17);
+		g.drawLine(5,  20,  25,  20);
+		g.drawLine(25,  20,  23,  23);
+		g.drawLine(25,  20,  23,  18);
+		
+		g.setColor(Color.RED);
+		Vector3D leftA = new Vector3D(mModel.getMinX(), mModel.getCenterY(), mModel.getCenterZ());
+		Vector3D rightA = new Vector3D(mModel.getMaxX(), mModel.getCenterY(), mModel.getCenterZ());
+		int[] project0 = projectPoint3D(leftA, scale);
+		int[] project1 = projectPoint3D(rightA, scale);
+		g.drawLine(project0[0],  project0[1],  project1[0],  project1[1]);
+		g.drawChars(Axis.A.toString().toCharArray(), 0, 1, project0[0], project0[1] - 10);
 		
 	}
 
@@ -200,11 +222,12 @@ public class ParallelProjectionView extends JPanel {
 		};
 		return retval;
 	}
-	/*
+	/**
 	 * Do a parallel projection of the given X,Y,Z,A,B coordinate.
 	 * @param aZOffset an offset to add onto the Z coordinate before projecting
+	 * @param tool if true, the inverse of the rotation is applied since we are actually turning the object but show it as rotating the tool inverse
 	 */
-	protected int[] projectPoint5D(final double[] aCoordinate, final double aZOffset) {
+	protected int[] projectPoint5D(final double[] aCoordinate, final double aZOffset, boolean tool) {
 
 		System.out.println("DEBUG: projectPoint5D " + Arrays.toString(aCoordinate));
 		//TODO: avoid object creation
@@ -213,14 +236,22 @@ public class ParallelProjectionView extends JPanel {
 
 		// rotate around A
 		Axis[] plane = Axis.A.getRotationPlane();
-		double[] temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], aCoordinate[Axis.A.ordinal()]);
+		double angle = aCoordinate[Axis.A.ordinal()];
+		if (tool) {
+			angle = -1.0d * angle;
+		}
+		double[] temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], angle);
 		c[plane[0].ordinal()] = temp[0];
 		c[plane[1].ordinal()] = temp[1];
 
 		// rotate around B
 		if (aCoordinate.length > Axis.B.ordinal()) {
 			plane = Axis.B.getRotationPlane();
-			temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], aCoordinate[Axis.B.ordinal()]);
+			angle = aCoordinate[Axis.B.ordinal()];
+			if (tool) {
+				angle = -1.0d * angle;
+			}
+			temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], angle);
 			c[plane[0].ordinal()] = temp[0];
 			c[plane[1].ordinal()] = temp[1];
 		}
