@@ -75,13 +75,13 @@ public class StrategyCreationPanel extends JPanel {
 					cutStrategy = new StraightZCutStrategy(aModel, cutStrategy);
 				}
 
-				// 2. every stel of 1., do around the A axis in 10° steps
-				IStrategy aroundAAxis = new LinearStrategy(aModel, Axis.A, 10d, cutStrategy );
+				// 2. every step of 1., do around the A axis in 10° steps
+				IStrategy aroundAAxis = new LinearStrategy(aModel, Axis.A, 1.0d, cutStrategy );
 
 				// 1. start by moving along the Y axis in 1.1mm steps
-				LinearStrategy alongYAxis = new LinearStrategy(aModel, Axis.Y, 1.1d, aroundAAxis);
+				LinearStrategy alongXAxis = new LinearStrategy(aModel, Axis.X, 0.33d, aroundAAxis);
 				
-			return alongYAxis;
+			return alongXAxis;
 	}
 
 }

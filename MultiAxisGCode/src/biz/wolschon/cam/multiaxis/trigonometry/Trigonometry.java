@@ -69,27 +69,28 @@ public class Trigonometry {
 
 
 	/**
-	 * @returns the rotation angle of the given vector around the given axis in Degrees.
+	 * @returns the rotation angle of the given vector around the given axis in Degrees counterclockwise.
 	 */
 	public static double getRotationAngle(final Vector3D  tool, final Axis rotationAxis) {
 		Axis plane[] = rotationAxis.getRotationPlane();
-		double length = vectorLength2D(tool, plane[0], plane[1]);
-		double normalized[] = new double[] {
-				plane[0].get(tool) / length,
-				plane[1].get(tool) / length
-			};
-		double angle = Math.atan2(-1.0d * normalized[0], normalized[1]);
-		if (angle > Math.PI) {
-			angle -= 2.0d * Math.PI;
+		//double length = vectorLength2D(tool, plane[0], plane[1]);
+		//double normalized[] = new double[] {
+		//		plane[0].get(tool) / length,
+		//		plane[1].get(tool) / length
+		//	};
+		double angle = Math.atan2(plane[1].get(tool), plane[0].get(tool));
+		double degrees =  Math.toDegrees(angle) - 90;
+		if (degrees >= 360) {
+			degrees -= 360;
 		}
-		if (angle < Math.PI) {
-			angle += 2.0d * Math.PI;
+		if (degrees < 0) {
+			degrees += 360;
 		}
-		return Math.toDegrees(angle);
+		return degrees;
 	}
 
 	/**
-	 * @param angle the rotation angle in degrees
+	 * @param angle the rotation angle in degrees, counterclockwise.
 	 * @returns the rotated 2D vector.
 	 */
 	public static double[] rotate2D (final double u, final double v, final double angle) {
@@ -121,9 +122,9 @@ public class Trigonometry {
 		if (tip instanceof BallShape) {
 			BallShape ball = (BallShape) tip;
 			// we rotate the center of the ball, then subtract the radius to get the rotated tip of the ball-tip
-			machinePosition[Axis.Z.ordinal()] += ball.getRadius();
+			//machinePosition[Axis.Z.ordinal()] -= ball.getRadius();
 			inverseKinematic2D(machinePosition, rotationAxis, toolVector);
-			machinePosition[Axis.Z.ordinal()] -= ball.getRadius();
+			//machinePosition[Axis.Z.ordinal()] += ball.getRadius();
 			return;
 		}
 		if (tip instanceof ConeShape) {
@@ -147,10 +148,10 @@ public class Trigonometry {
 			double oldHeight =  machinePosition[plane[0].ordinal()];
 			double oldWidth =  machinePosition[plane[1].ordinal()];
 			double angle = -1 * getRotationAngle(tool, rotationAxis);
-			double rotated[] = rotate2D(oldHeight, oldWidth, angle);
+			double rotated[] = rotate2D(oldHeight, oldWidth, angle); //  - machinePosition[rotationAxis.ordinal()]
 			machinePosition[plane[0].ordinal()] = rotated[0]; 
 			machinePosition[plane[1].ordinal()] = rotated[1];
-			machinePosition[rotationAxis.ordinal()] += angle;
+			machinePosition[rotationAxis.ordinal()] = angle;
 			while (machinePosition[rotationAxis.ordinal()] > 360) {
 				machinePosition[rotationAxis.ordinal()] -= 360.0d;
 			}

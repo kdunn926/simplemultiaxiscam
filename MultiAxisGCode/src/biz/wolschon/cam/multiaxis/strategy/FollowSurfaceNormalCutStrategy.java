@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -53,9 +54,13 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 		//TODO: do inverse kinematic using the surface normal at aCollision
 		Triangle polygon = aCollision.getCollidingPolygon();
 		Vector3D normal	 = polygon.getNormal();
+System.out.println("FollowSurfaceNormalCutStrategy normal=" + normal.toString());
 		//Vector3D point   = aCollision.getCollisionPoint(); 
 
+		aStartLocation[Axis.X.ordinal()] = aCollision.getCollisionPoint().getX();
+		aStartLocation[Axis.Y.ordinal()] = aCollision.getCollisionPoint().getY();
 		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
+		aStartLocation[Axis.A.ordinal()] = 0;
 		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, mTool);
 
 		this.mNext.runStrategy(aStartLocation);
