@@ -35,9 +35,9 @@ public class StrategyCreationPanel extends JPanel {
 
 
 	/**
-	 * The tool we use Currently fixed to a 5.0mm ball nose cutter.
+	 * The tool we use Currently fixed to a 1.0mm ball nose cutter.
 	 */
-	private Tool mTool = new Tool(5.0d);
+	private Tool mTool = new Tool(1.0d);
 
 	private JCheckBox mReal4Axis;
 

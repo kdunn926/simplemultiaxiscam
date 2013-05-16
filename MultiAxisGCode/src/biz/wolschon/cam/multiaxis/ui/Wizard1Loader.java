@@ -42,7 +42,10 @@ public class Wizard1Loader extends JFrame {
 				return file.getName().toLowerCase().endsWith(".stl");
 			}
 		});
-		chooser.showOpenDialog(this); //TODO: result
+		File testdir = new File(System.getProperty("user.dir"), "test");
+		chooser.setCurrentDirectory(testdir);
+		chooser.setSelectedFile(new File(testdir, "cube.stl"));
+		chooser.showOpenDialog(this);
 		File f = chooser.getSelectedFile();
 		STLModel model = new STLModel(f);
 		mListener.onFileLoaded(model);
