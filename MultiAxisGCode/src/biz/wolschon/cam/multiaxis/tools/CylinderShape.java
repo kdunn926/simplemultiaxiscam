@@ -24,7 +24,8 @@ public class CylinderShape implements IToolShape {
 	 * @param aLocation height of the lowest part of this shape above 0=tip.
 	 * @param aDiameter diameter of the cylinder shape
 	 * @param aLength length of the cylinder shape
-	public ConeShape (final double aLocation, final double aDiameter, final double aLength) {
+	 */
+	public CylinderShape(final double aLocation, final double aDiameter, final double aLength) {
 		this.mLocation = aLocation;
 		this.mDiameter = aDiameter;
 		this.mLength   = aLength;

@@ -4,6 +4,7 @@ package biz.wolschon.cam.multiaxis.views;
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.model.Triangle;
 import biz.wolschon.cam.multiaxis.tools.BallShape;
+import biz.wolschon.cam.multiaxis.tools.CylinderShape;
 import biz.wolschon.cam.multiaxis.tools.IToolShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
@@ -58,6 +59,8 @@ public class ParallelProjectionView extends JPanel {
 	 */
 	private BufferedImage mDoubleBuffer;
 	private double scale;
+	private int horizontalOffset;
+	private int verticalOffset;
 	/**
 	 * Used for double buffering.
 	 */
@@ -126,21 +129,27 @@ public class ParallelProjectionView extends JPanel {
 		g.drawImage(mDoubleBuffer, 0, 0, this);
 		
 		// draw tool
-				if (mTool != null && mToolLocation != null) {
-					g.setColor(Color.RED);
-					for (IToolShape shape : mTool.getShape()) {
-						// draw tool on top of wireframe
-						if (shape instanceof BallShape) {
-							BallShape ball = (BallShape) shape;
-							int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius(), 0.0d);
-							//TODO: allow solid in addition to wireframe
-							int d = (int) ( ball.getDiameter() * scale);
-							g.drawOval(center[0], center[1], d, d);
-						} else {
-							//TODO: support other shapes too
-						}
-					}
+		if (mTool != null && mToolLocation != null) {
+			g.setColor(Color.RED);
+			for (IToolShape shape : mTool.getShape()) {
+				// draw tool on top of wireframe
+				if (shape instanceof BallShape) {
+					BallShape ball = (BallShape) shape;
+					int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius());
+					//TODO: allow solid in addition to wireframe
+					int d = (int) ( ball.getDiameter() * scale);
+					g.drawOval(center[0] - d/2, center[1] - d/2, d, d);
+				} else if (shape instanceof CylinderShape) {
+					CylinderShape cyl = (CylinderShape) shape;
+					int[] low = projectPoint5D(mToolLocation, cyl.getLocation());
+					int[] high = projectPoint5D(mToolLocation, cyl.getLocation() + cyl.getLength());
+					//TODO: allow solid in addition to wireframe
+					g.drawLine(low[0], low[1], high[0], high[1]);
+				} else {
+					//TODO: support other shapes too
 				}
+			}
+		}
 	}
 
 	/**
@@ -154,7 +163,9 @@ public class ParallelProjectionView extends JPanel {
 		// draw mesh
 		double horizontalScale = getWidth() / (mHorizontalMax - mHorizontalMin);
 		double verticalScale = getHeight() / (mVerticalMax - mVerticalMin);
-		this.scale = Math.min(horizontalScale, verticalScale);
+		this.scale = Math.min(horizontalScale, verticalScale) / 2.0d;
+		this.horizontalOffset = getWidth()/2;
+		this.verticalOffset = getHeight()/2;
 		//TODO: draw mesh
 		int count = mModel.getTriangleCount();
 		g.setColor(Color.WHITE);
@@ -184,8 +195,8 @@ public class ParallelProjectionView extends JPanel {
 	protected int[] projectPoint3D(final Vector3D aVector3d, final double aScale) {
 		//TODO: avoid object creation
 		int[] retval = new int[] {
-			(int) ((mAxisHorizontal.get(aVector3d) - this.mHorizontalMin) * aScale),
-			(int) ((mAxisVertical.get(aVector3d) - this.mVerticalMin) * aScale)
+			(int) ((mAxisHorizontal.get(aVector3d) - this.mHorizontalMin) * aScale + horizontalOffset),
+			(int) ((mAxisVertical.get(aVector3d) - this.mVerticalMin) * aScale + verticalOffset)
 		};
 		return retval;
 	}
@@ -193,7 +204,7 @@ public class ParallelProjectionView extends JPanel {
 	 * Do a parallel projection of the given X,Y,Z,A,B coordinate.
 	 * @param aZOffset an offset to add onto the Z coordinate before projecting
 	 */
-	protected int[] projectPoint5D(final double[] aCoordinate, final double aScale, final double aZOffset) {
+	protected int[] projectPoint5D(final double[] aCoordinate, final double aZOffset) {
 
 		System.out.println("DEBUG: projectPoint5D " + Arrays.toString(aCoordinate));
 		//TODO: avoid object creation
@@ -215,8 +226,8 @@ public class ParallelProjectionView extends JPanel {
 		}
 	
 		int[] retval = new int[] {
-			(int) ((c[mAxisHorizontal.ordinal()] - this.mHorizontalMin) * aScale),
-			(int) ((c[mAxisVertical.ordinal()] - this.mVerticalMin) * aScale)
+			(int) ((c[mAxisHorizontal.ordinal()] - this.mHorizontalMin) * scale + horizontalOffset),
+			(int) ((c[mAxisVertical.ordinal()] - this.mVerticalMin) * scale + verticalOffset)
 		};
 		return retval;
 	}

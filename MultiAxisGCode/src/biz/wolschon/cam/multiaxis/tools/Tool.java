@@ -9,7 +9,10 @@ public class Tool {
 	 * Construct a ball not cutter.
 	 */
 	public Tool(final double aBallNoseDiameter) {
-		this.shapes = new IToolShape[]{new BallShape(0, aBallNoseDiameter)};
+		this.shapes = new IToolShape[]{
+				new BallShape(0, aBallNoseDiameter),
+				new CylinderShape(aBallNoseDiameter/2.0d, aBallNoseDiameter/2.0d, 50d),
+				};
 	}
 	/**
 	 * Construct an engraving tip cutter.
