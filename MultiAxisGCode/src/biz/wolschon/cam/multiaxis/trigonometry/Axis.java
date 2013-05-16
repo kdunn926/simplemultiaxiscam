@@ -50,6 +50,18 @@ public enum Axis {
 			Rotation rot = new Rotation(new Vector3D(0d,1d,0d), degrees);
 			return rot;
 		}
+	},
+	C(Z) {
+		@Override
+		public double get(Vector3D v) {
+			throw new IllegalStateException("Vector3D has no C axis");
+		}
+
+		@Override
+		public Rotation getRotation(double degrees) {
+			Rotation rot = new Rotation(new Vector3D(0d,0d,1d), degrees);
+			return rot;
+		}
 	};
 	private boolean isLinearAxis;
 	public boolean isLinearAxis() {
