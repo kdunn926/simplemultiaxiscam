@@ -24,11 +24,11 @@ public class MainFrame extends JFrame {
 			Wizard1Loader step1 = new Wizard1Loader(new Wizard1Loader.Listener() {
 				
 				@Override
-				public void onFileLoaded(final IModel model) throws IOException {
+				public void onFileLoaded(final IModel aModel) throws IOException {
 					EventQueue.invokeLater(new Runnable() {
 						public void run() {
 							try {
-								MainFrame frame = new MainFrame(model);
+								MainFrame frame = new MainFrame(aModel);
 								frame.setVisible(true);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -46,10 +46,13 @@ public class MainFrame extends JFrame {
 		
 	}
 
+	private ModelReviewPanel mReviewTab;
+	private StrategyCreationPanel mStrategyTab;
+	private GCodePanel mGCodeTab;
 	/**
 	 * Create the frame.
 	 */
-	public MainFrame(final IModel model) {
+	public MainFrame(final IModel aModel) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -59,8 +62,15 @@ public class MainFrame extends JFrame {
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
-		tabbedPane.addTab("Review Model", new ModelReviewPanel(model));
-		tabbedPane.addTab("Generate G-Code", new GCodePanel(model));
+
+		mReviewTab = new ModelReviewPanel(aModel);
+		tabbedPane.addTab("review model", mReviewTab);
+
+		mStrategyTab = new StrategyCreationPanel();
+		tabbedPane.addTab("cutting strategy", mStrategyTab);
+
+		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategyTab);
+		tabbedPane.addTab("generate G-Code", mGCodeTab);
 	}
 
 }

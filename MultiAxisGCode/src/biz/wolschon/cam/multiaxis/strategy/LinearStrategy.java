@@ -14,22 +14,32 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 public class LinearStrategy implements IStrategy {
 
 	private IModel mModel;
+	/**
+	 * The axis we move along in this strategy. Any value set by a previous strategy is overwritten.
+	 */
 	private Axis mAxis;
+	/**
+	 * The increment (in the current unit, e.g. "mm") we use to move along #mAxis.
+	 */
 	private double mStep;
 	private IStrategy mNextStrategy;
 
-	public LinearStrategy(IModel model, Axis axis, double step, IStrategy child) {
-		this.mModel = model;
-		this.mAxis = axis;
-		this.mStep = step;
-		this.mNextStrategy = child;
+	/**
+	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
+	 * @param aStep The increment (in the current unit, e.g. "mm") we use to move along aAxis.
+	 */
+	public LinearStrategy(IModel aModel, Axis aAxis, double aStep, IStrategy aChild) {
+		this.mModel = aModel;
+		this.mAxis = aAxis;
+		this.mStep = aStep;
+		this.mNextStrategy = aChild;
 	}
 
 	@Override
-	public void runStrategy(double startLocation[]) throws IOException {
-		double[] currentLocation = new double[startLocation.length];
-		System.arraycopy(startLocation, 0, currentLocation, 0, startLocation.length);
-		double current = startLocation[mAxis.ordinal()];
+	public void runStrategy(final double aStartLocation[]) throws IOException {
+		double[] currentLocation = new double[aStartLocation.length];
+		System.arraycopy(aStartLocation, 0, currentLocation, 0, aStartLocation.length);
+		double current = aStartLocation[mAxis.ordinal()];
 		double max = mModel.getMax(mAxis);
 		while (current < max) {
 			currentLocation[mAxis.ordinal()] = current;
@@ -38,4 +48,8 @@ public class LinearStrategy implements IStrategy {
 		}
 	}
 
+	@Override
+	public void endStrategy()  throws IOException {
+		this.mNextStrategy.endStrategy();
+	}
 }

@@ -5,31 +5,44 @@ import java.io.Writer;
 
 public class GCodeWriterStrategy implements IStrategy {
 
-	private Writer out;
+	/*
+	 * Where we write our G-Code to.
+	 */
+	private Writer mOut;
 	
-	public GCodeWriterStrategy(final Writer out) {
-		this.out = out;
+	/**
+	 * @param aOutput where we write our G-Code to.
+	 */
+	public GCodeWriterStrategy(final Writer aOutput) {
+		this.mOut = aOutput;
+		//TODO: write a G-Code header (use metric coordinates, spin up the spindle)
 	}
+
 	@Override
-	public void runStrategy(final double[] startLocation) throws IOException {
+	public void runStrategy(final double[] aNextToolLocation) throws IOException {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("G1 X").append(Double.toString(startLocation[0]));
-		sb.append(" Y").append(Double.toString(startLocation[1]));
-		sb.append(" Z").append(Double.toString(startLocation[2]));
-		sb.append(" A").append(Double.toString(startLocation[3]));
-		if (startLocation.length > 4) {
-			sb.append(" B").append(Double.toString(startLocation[4]));
+		sb.append("G1 X").append(Double.toString(aNextToolLocation[0]));
+		sb.append(" Y").append(Double.toString(aNextToolLocation[1]));
+		sb.append(" Z").append(Double.toString(aNextToolLocation[2]));
+		sb.append(" A").append(Double.toString(aNextToolLocation[3]));
+		if (aNextToolLocation.length > 4) {
+			sb.append(" B").append(Double.toString(aNextToolLocation[4]));
 		}
 		sb.append("\n");
-		writeCodeLine(sb.toString(), startLocation);
+		writeCodeLine(sb.toString(), aNextToolLocation);
 		
-		System.out.print(sb.toString()); //TODO: debug
+		System.out.print(sb.toString()); //TODO: debug output
 		
 	}
 	
 	protected void writeCodeLine(final String s, final double[] location) throws IOException {
-		out.write(s);
+		mOut.write(s);
 	}
 
+
+	@Override
+	public void endStrategy()  throws IOException {
+		//TODO: write G-Code footer (spin down spindle, stop program)
+	}
 }

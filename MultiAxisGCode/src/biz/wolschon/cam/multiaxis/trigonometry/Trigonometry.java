@@ -2,6 +2,7 @@ package biz.wolschon.cam.multiaxis.trigonometry;
 
 import java.lang.Math;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import biz.wolschon.cam.multiaxis.tools.BallShape;
 import biz.wolschon.cam.multiaxis.tools.ConeShape;
 import biz.wolschon.cam.multiaxis.tools.IToolShape;
@@ -30,6 +31,21 @@ public class Trigonometry {
 		double length = Math.sqrt(d0 + d1);
 		return length;
 	}
+	/**
+	 * Calculates the length oft the given vector in 2D space using the given dimensions.
+	 * @param vector the vector to use	 
+	 * @param first the first dimension (e.g. Axis.X)
+	 * @param second the second dimension (e.g. Axis.Y)
+	 */
+	public static double vectorLength2D(final Vector3D vector, final Axis first, final Axis second) {
+		double d0 = first.get(vector);
+		d0 = d0 * d0;
+		double d1 = second.get(vector);
+		d1 = d1 * d1;
+		
+		double length = Math.sqrt(d0 + d1);
+		return length;
+	}
 
 	/**
 	 * @returns the rotation angle of the given vector around the given axis in Degrees.
@@ -40,6 +56,27 @@ public class Trigonometry {
 		double normalized[] = new double[] {
 				tool[plane[0].ordinal()] / length,
 				tool[plane[1].ordinal()] / length
+			};
+		double angle = Math.atan2(-1.0d * normalized[0], normalized[1]);
+		if (angle > Math.PI) {
+			angle -= 2.0d * Math.PI;
+		}
+		if (angle < Math.PI) {
+			angle += 2.0d * Math.PI;
+		}
+		return Math.toDegrees(angle);
+	}
+
+
+	/**
+	 * @returns the rotation angle of the given vector around the given axis in Degrees.
+	 */
+	public static double getRotationAngle(final Vector3D  tool, final Axis rotationAxis) {
+		Axis plane[] = rotationAxis.getRotationPlane();
+		double length = vectorLength2D(tool, plane[0], plane[1]);
+		double normalized[] = new double[] {
+				plane[0].get(tool) / length,
+				plane[1].get(tool) / length
 			};
 		double angle = Math.atan2(-1.0d * normalized[0], normalized[1]);
 		if (angle > Math.PI) {
@@ -68,7 +105,7 @@ public class Trigonometry {
 	 * Include an offset introduced due to the tool having a shape and volume<br/>
 	 * Side effect: machinePosition is changed to the rotated machine location.
 	 */
-	public static void inverseToolKinematic5Axis(final double[] machinePosition, final double[] toolVector, final Tool tool) {
+	public static void inverseToolKinematic5Axis(final double[] machinePosition, final Vector3D toolVector, final Tool tool) {
 		inverseToolKinematic4Axis(machinePosition, Axis.A, toolVector, tool);
 		inverseToolKinematic4Axis(machinePosition, Axis.B, toolVector, tool);
 	}
@@ -78,7 +115,7 @@ public class Trigonometry {
 	 * Include an offset introduced due to the tool having a shape and volume<br/>
 	 * Side effect: machinePosition is changed to the rotated machine location.
 	 */
-	public static void inverseToolKinematic4Axis(final double[] machinePosition, final Axis rotationAxis, final double[] toolVector, final Tool tool) {
+	public static void inverseToolKinematic4Axis(final double[] machinePosition, final Axis rotationAxis, final Vector3D toolVector, final Tool tool) {
 		IToolShape tip = tool.getTipShape();
 		//TODO: limit the rotation angle, so no part of the shaft of the tool collides with the part
 		if (tip instanceof BallShape) {
@@ -87,13 +124,15 @@ public class Trigonometry {
 			machinePosition[Axis.Z.ordinal()] += ball.getRadius();
 			inverseKinematic2D(machinePosition, rotationAxis, toolVector);
 			machinePosition[Axis.Z.ordinal()] -= ball.getRadius();
+			return;
 		}
 		if (tip instanceof ConeShape) {
 			// no adjustment required since the tip is infinitely small
 			// TODO: limit the rotation angle to be at most the angle of the tool
 			inverseKinematic2D(machinePosition, rotationAxis, toolVector);
+			return;
 		}
-		throw new IllegalArgumentException("we only support ball nose and engraving cutters yet"); //TODO: support more cutter shapes
+		throw new IllegalArgumentException("we only support ball nose and engraving cutters yet, not " + tip.getClass().getName()); //TODO: support more cutter shapes
 	}
 
 
@@ -103,8 +142,8 @@ public class Trigonometry {
 	 * The tool is assumed to be infinitely small.
 	 * @see inverseToolKinematic4Axis
 	 */
-	protected static void inverseKinematic2D(final double[] machinePosition, final Axis rotationAxis, final double[] tool) {
-			Axis[] plane = rotationAxis .getRotationPlane();
+	protected static void inverseKinematic2D(final double[] machinePosition, final Axis rotationAxis, final Vector3D tool) {
+			Axis[] plane = rotationAxis.getRotationPlane();
 			double oldHeight =  machinePosition[plane[0].ordinal()];
 			double oldWidth =  machinePosition[plane[1].ordinal()];
 			double angle = getRotationAngle(tool, rotationAxis);

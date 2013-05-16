@@ -17,4 +17,7 @@ public class Collision {
 	public Vector3D getCollisionPoint() {
 		return collisionPoint;
 	}
+	public Triangle getCollidingPolygon() {
+		return triangle;
+	}
 }

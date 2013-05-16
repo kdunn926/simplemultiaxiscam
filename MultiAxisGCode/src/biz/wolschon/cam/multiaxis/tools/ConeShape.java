@@ -8,52 +8,42 @@ public class ConeShape implements IToolShape {
 	/**
 	 * Height of the lowest part of this shape above 0=tip.
 	 */
-	private double location;
+	private double mLocation;
 
 	/**
 	 * Diameter of the cone shape.
 	 */
-	private double diameter;
+	private double mDiameter;
 
 	/**
 	 * Length of the cone shape.
 	 */
-	private double length;
+	private double mLength;
 
 
 	/**
-	 * 
-	 * @param location Height of the lowest part of this shape above 0=tip.
-	 * @param diameter Diameter of the ball shape.
+	 * @param aLocation height of the lowest part of this shape above 0=tip.
+	 * @param aDiameter diameter of the cone shape
+	 * @param aLength length of the cone shape
 	 */
-	public ConeShape(double location, double diameter, double length) {
-		super();
-		this.location = location;
-		this.diameter = diameter;
-		this.length = length;
-	}
-	/**
-	 * @param location height of the lowest part of this shape above 0=tip.
-	 * @param diameter diameter of the cone shape
-	 * @param length length of the cone shape
-	public ConeShape (final double location, final double diameter, final double length) {
-		this.location = location;
-		this.diameter = diameter;
-		this.length   = length;
+	public ConeShape (final double aLocation, final double aDiameter, final double aLength) {
+		this.mLocation = aLocation;
+		this.mDiameter = aDiameter;
+		this.mLength   = aLength;
 	}
 
 	/**
 	 * @return Height of the lowest part of this shape above 0=tip.
 	 */
 	public double getLocation() {
-		return location;
+		return mLocation;
 	}
 
 	/**
 	 * @return Diameter of the cone shape
 	 */
 	public double getDiameter() {
-		return diameter;
+		return mDiameter;
 	}
 
 
@@ -61,13 +51,13 @@ public class ConeShape implements IToolShape {
 	 * @return length of the cone shape
 	 */
 	public double getLength() {
-		return length;
+		return mLength;
 	}
 
 	/**
 	 * @return Radius  of the cone shape
 	 */
 	public double getRadius() {
-		return diameter / 2.0d;
+		return mDiameter / 2.0d;
 	}
 }

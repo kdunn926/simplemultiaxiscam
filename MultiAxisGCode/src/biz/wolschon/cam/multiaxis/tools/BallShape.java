@@ -8,50 +8,50 @@ public class BallShape implements IToolShape {
 	/**
 	 * Height of the lowest part of this shape above 0=tip.
 	 */
-	private double location;
+	private double mLocation;
 
 	/**
 	 * Diameter of the ball shape.
 	 */
-	private double diameter;
+	private double mDiameter;
 
 	/**
 	 * 
-	 * @param location Height of the lowest part of this shape above 0=tip.
-	 * @param diameter Diameter of the ball shape.
+	 * @param aLocation Height of the lowest part of this shape above 0=tip.
+	 * @param aDiameter Diameter of the ball shape.
 	 */
-	public BallShape(double location, double diameter) {
+	public BallShape(double aLocation, double aDiameter) {
 		super();
-		this.location = location;
-		this.diameter = diameter;
+		this.mLocation = aLocation;
+		this.mDiameter = aDiameter;
 	}
 
 	/**
-	 * @param location height of the lowest part of this shape above 0=tip.
-	 * @param diameter of the ball shape
-	public BallShape (final double location, final double diameter) {
-		this.location = location;
-		this.diameter = diameter;
+	 * @param aLocation height of the lowest part of this shape above 0=tip.
+	 * @param aDiameter of the ball shape
+	public BallShape (final double aLocation, final double aDiameter) {
+		this.mLocation = aLocation;
+		this.mDiameter = aDiameter;
 	}
 
 	/**
 	 * @return Height of the lowest part of this shape above 0=tip.
 	 */
 	public double getLocation() {
-		return location;
+		return mLocation;
 	}
 
 	/**
 	 * @return Diameter of the ball shape
 	 */
 	public double getDiameter() {
-		return diameter;
+		return mDiameter;
 	}
 
 	/**
 	 * @return Radius of the ball shape
 	 */
 	public double getRadius() {
-		return diameter / 2.0d;
+		return mDiameter / 2.0d;
 	}
 }

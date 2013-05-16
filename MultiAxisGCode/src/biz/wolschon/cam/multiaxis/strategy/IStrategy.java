@@ -12,4 +12,7 @@ import java.io.IOException;
 public interface IStrategy {
 
 	void runStrategy(double startLocation[]) throws IOException;
+
+
+	void endStrategy() throws IOException;
 }

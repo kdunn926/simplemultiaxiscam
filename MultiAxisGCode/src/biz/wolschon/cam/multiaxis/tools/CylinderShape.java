@@ -8,40 +8,40 @@ public class CylinderShape implements IToolShape {
 	/**
 	 * Height of the lowest part of this shape above 0=tip.
 	 */
-	private double location;
+	private double mLocation;
 
 	/**
 	 * Diameter of the cylinder shape.
 	 */
-	private double diameter;
+	private double mDiameter;
 
 	/**
 	 * Length of the cylinder shape.
 	 */
-	private double length;
+	private double mLength;
 
 	/**
-	 * @param location height of the lowest part of this shape above 0=tip.
-	 * @param diameter diameter of the cylinder shape
-	 * @param length length of the cylinder shape
-	public ConeShape (final double location, final double diameter, final double length) {
-		this.location = location;
-		this.diameter = diameter;
-		this.length   = length;
+	 * @param aLocation height of the lowest part of this shape above 0=tip.
+	 * @param aDiameter diameter of the cylinder shape
+	 * @param aLength length of the cylinder shape
+	public ConeShape (final double aLocation, final double aDiameter, final double aLength) {
+		this.mLocation = aLocation;
+		this.mDiameter = aDiameter;
+		this.mLength   = aLength;
 	}
 
 	/**
 	 * @return Height of the lowest part of this shape above 0=tip.
 	 */
 	public double getLocation() {
-		return location;
+		return mLocation;
 	}
 
 	/**
 	 * @return Diameter of the cylinder shape
 	 */
 	public double getDiameter() {
-		return diameter;
+		return mDiameter;
 	}
 
 
@@ -49,13 +49,13 @@ public class CylinderShape implements IToolShape {
 	 * @return length of the cylinder shape
 	 */
 	public double getLength() {
-		return length;
+		return mLength;
 	}
 
 	/**
 	 * @return Radius  of the cylinder shape
 	 */
 	public double getRadius() {
-		return diameter / 2.0d;
+		return mDiameter / 2.0d;
 	}
 }

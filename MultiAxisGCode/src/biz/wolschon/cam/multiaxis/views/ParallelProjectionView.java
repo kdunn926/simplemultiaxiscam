@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import javax.swing.JPanel;
 
@@ -56,22 +57,36 @@ public class ParallelProjectionView extends JPanel {
 	 * Bitmap used for double buffering.
 	 */
 	private BufferedImage mDoubleBuffer;
+	private double scale;
 	/**
 	 * Used for double buffering.
 	 */
 	private static final GraphicsConfiguration mGraphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
 
-	public ParallelProjectionView(final IModel model, final Tool tool) {
-		this.mModel = model;
-		this.mTool  = tool;
+	/**
+	 * @param aTool may be null
+	 */
+	public ParallelProjectionView(final IModel aModel, final Tool aTool) {
+		this.mModel = aModel;
+		this.mTool  = aTool;
 		setVerticalAxis(Axis.Z);
 		setHorizontalAxis(Axis.X);
 	}
 
-	public void setToolLocation(final double[] toolLocation) {
-		this.mToolLocation = toolLocation;
-		this.mDoubleBuffer = null;
-		repaint();
+	public void setToolLocation(final double[] aToolLocation) {
+		this.mToolLocation = aToolLocation;
+		if (this.mTool != null)  {
+			//this.mDoubleBuffer = null;
+			repaint();
+		}
+	}
+	public void setTool(final Tool aTool) {
+
+		this.mTool = aTool;
+		if (this.mToolLocation != null)  {
+			//this.mDoubleBuffer = null;
+			repaint();
+		}
 	}
 
 	public void setVerticalAxis(final Axis a) {
@@ -109,6 +124,23 @@ public class ParallelProjectionView extends JPanel {
 			paintToBuffer((Graphics2D) mDoubleBuffer.getGraphics());
 		}
 		g.drawImage(mDoubleBuffer, 0, 0, this);
+		
+		// draw tool
+				if (mTool != null && mToolLocation != null) {
+					g.setColor(Color.RED);
+					for (IToolShape shape : mTool.getShape()) {
+						// draw tool on top of wireframe
+						if (shape instanceof BallShape) {
+							BallShape ball = (BallShape) shape;
+							int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius(), 0.0d);
+							//TODO: allow solid in addition to wireframe
+							int d = (int) ( ball.getDiameter() * scale);
+							g.drawOval(center[0], center[1], d, d);
+						} else {
+							//TODO: support other shapes too
+						}
+					}
+				}
 	}
 
 	/**
@@ -122,7 +154,7 @@ public class ParallelProjectionView extends JPanel {
 		// draw mesh
 		double horizontalScale = getWidth() / (mHorizontalMax - mHorizontalMin);
 		double verticalScale = getHeight() / (mVerticalMax - mVerticalMin);
-		double scale = Math.min(horizontalScale, verticalScale);
+		this.scale = Math.min(horizontalScale, verticalScale);
 		//TODO: draw mesh
 		int count = mModel.getTriangleCount();
 		g.setColor(Color.WHITE);
@@ -143,59 +175,48 @@ public class ParallelProjectionView extends JPanel {
 			g.drawLine(project2[0], project2[1], project0[0], project0[1]);
 		}
 
-		// draw tool
-		if (mTool != null && mToolLocation != null) {
-			g.setColor(Color.RED);
-			for (IToolShape shape : mTool.getShape()) {
-				// draw tool on top of wireframe
-				if (shape instanceof BallShape) {
-					BallShape ball = (BallShape) shape;
-					int[] center = projectPoint5D(mToolLocation, ball.getLocation()+ball.getRadius(), 0.0d);
-					//TODO: allow solid in addition to wireframe
-					int d = (int) ( ball.getDiameter() * scale);
-					g.drawOval(center[0], center[1], d, d);
-				} else {
-					//TODO: support other shapes too
-				}
-			}
-		}
+		
 	}
 
 	/**
 	 * Do a parallel projection of the given X,Y,Z coordinate. Ignore Axis.A and Axis.B.
 	 */
-	protected int[] projectPoint3D(final Vector3D vector3d, final double scale) {
+	protected int[] projectPoint3D(final Vector3D aVector3d, final double aScale) {
 		//TODO: avoid object creation
 		int[] retval = new int[] {
-			(int) ((mAxisHorizontal.get(vector3d) - this.mHorizontalMin) * scale),
-			(int) ((mAxisVertical.get(vector3d) - this.mVerticalMin) * scale)
+			(int) ((mAxisHorizontal.get(aVector3d) - this.mHorizontalMin) * aScale),
+			(int) ((mAxisVertical.get(aVector3d) - this.mVerticalMin) * aScale)
 		};
 		return retval;
 	}
-	/**
+	/*
 	 * Do a parallel projection of the given X,Y,Z,A,B coordinate.
-	 * @param zOffset an offset to add onto the Z coordinate before projecting
+	 * @param aZOffset an offset to add onto the Z coordinate before projecting
 	 */
-	protected int[] projectPoint5D(final double[] coordinate, final double scale, final double zOffset) {
+	protected int[] projectPoint5D(final double[] aCoordinate, final double aScale, final double aZOffset) {
+
+		System.out.println("DEBUG: projectPoint5D " + Arrays.toString(aCoordinate));
 		//TODO: avoid object creation
-		double[] c = new double[] {coordinate[0], coordinate[1], coordinate[2]};
-		c[Axis.Z.ordinal()] += zOffset;
+		double[] c = new double[] {aCoordinate[0], aCoordinate[1], aCoordinate[2]};
+		c[Axis.Z.ordinal()] += aZOffset;
 
 		// rotate around A
 		Axis[] plane = Axis.A.getRotationPlane();
-		double[] temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], coordinate[Axis.A.ordinal()]);
+		double[] temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], aCoordinate[Axis.A.ordinal()]);
 		c[plane[0].ordinal()] = temp[0];
 		c[plane[1].ordinal()] = temp[1];
 
 		// rotate around B
-		plane = Axis.B.getRotationPlane();
-		temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], coordinate[Axis.B.ordinal()]);
-		c[plane[0].ordinal()] = temp[0];
-		c[plane[1].ordinal()] = temp[1];
+		if (aCoordinate.length > Axis.B.ordinal()) {
+			plane = Axis.B.getRotationPlane();
+			temp = Trigonometry.rotate2D(c[plane[0].ordinal()], c[plane[1].ordinal()], aCoordinate[Axis.B.ordinal()]);
+			c[plane[0].ordinal()] = temp[0];
+			c[plane[1].ordinal()] = temp[1];
+		}
 	
 		int[] retval = new int[] {
-			(int) ((c[mAxisHorizontal.ordinal()] - this.mHorizontalMin) * scale),
-			(int) ((c[mAxisVertical.ordinal()] - this.mVerticalMin) * scale)
+			(int) ((c[mAxisHorizontal.ordinal()] - this.mHorizontalMin) * aScale),
+			(int) ((c[mAxisVertical.ordinal()] - this.mVerticalMin) * aScale)
 		};
 		return retval;
 	}
