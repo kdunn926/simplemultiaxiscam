@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.model;
 
 import java.util.List;
+import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -19,7 +20,7 @@ public interface IModel {
 	double getMaxZ();
 	double getMin(Axis axis);
 	double getMax(Axis axis);
-	List<Collision> getCollisions(Vector3D resolvedLocation, Vector3D direction);
+	SortedSet<Collision> getCollisions(Vector3D resolvedLocation, Vector3D direction);
 	public int getTriangleCount();
 	/**
 	 * TODO: abstract from internal representation

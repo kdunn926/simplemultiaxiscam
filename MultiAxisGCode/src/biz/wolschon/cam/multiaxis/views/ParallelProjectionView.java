@@ -163,7 +163,7 @@ public class ParallelProjectionView extends JPanel {
 		// draw mesh
 		double horizontalScale = getWidth() / (mHorizontalMax - mHorizontalMin);
 		double verticalScale = getHeight() / (mVerticalMax - mVerticalMin);
-		this.scale = Math.min(horizontalScale, verticalScale) / 2.0d;
+		this.scale = Math.min(horizontalScale, verticalScale) / 3.0d;
 		this.horizontalOffset = getWidth()/2;
 		this.verticalOffset = getHeight()/2;
 		//TODO: draw mesh

@@ -2,6 +2,7 @@ package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -42,7 +43,7 @@ public class StraightZCutStrategy implements IStrategy {
 		Rotation rotA = Axis.A.getRotation(aStartLocation[Axis.A.ordinal()]);
 
 		direction = rotA.applyInverseTo(direction);
-		List<Collision> collisions = getModel().getCollisions(new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]), direction);
+		SortedSet<Collision> collisions = getModel().getCollisions(new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]), direction);
 		if (collisions.size() == 0) {
 			runStrategyHole(aStartLocation);
 			return; // TODO: cut all the way through (hole)
@@ -53,12 +54,12 @@ public class StraightZCutStrategy implements IStrategy {
 		}
 		//TODO: sort collisions by distance
 
-		runStrategyCollision(aStartLocation, collisions.get(collisions.size() - 1));
+		runStrategyCollision(aStartLocation, collisions.first());
 	}
      protected void runStrategyHole(final double aStartLocation[]) {
 		System.out.println("hole detected at X" + aStartLocation[0] + " Y" + aStartLocation[1] + " Z" + aStartLocation[2] + " A" + aStartLocation[3]);	
 	}
-	protected void runStrategyNonConvex(final double aStartLocation[], final List<Collision> aCollisionList) {
+	protected void runStrategyNonConvex(final double aStartLocation[], final SortedSet<Collision> aCollisionList) {
 			//TODO: move Z to travel-height
 			//TODO use a linear(X)+linear(Y)+StraightZ combination  along the plane of the start+end of this noncave patch to handle it
 	}

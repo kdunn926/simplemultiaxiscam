@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Vector1D;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
@@ -15,6 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
+import biz.wolschon.cam.multiaxis.trigonometry.Trigonometry;
 
 public class STLModel implements IModel {
 
@@ -205,10 +209,24 @@ public class STLModel implements IModel {
 	 * starting in location and racing of into direction.
 	 */
 	@Override
-	public List<Collision> getCollisions(Vector3D location, Vector3D direction) {
-		List<Collision> result = new LinkedList<Collision>();
+	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection) {
+		SortedSet<Collision> result = new TreeSet<Collision>(new Comparator<Collision>() {
+
+			@Override
+			public int compare(Collision first, Collision second) {
+				double length1 = first.getCollisionPoint().subtract(aLocation).getNorm();
+				double length2 = second.getCollisionPoint().subtract(aLocation).getNorm();
+				if (length2 > length1) {
+					return 1;
+				}
+				if (length2 < length1) {
+					return 2;
+				}
+				return 0;
+			}
+		});
 		for (Triangle triangle : this.triangles) {
-			Collision c = checkForCollision(triangle, location, direction);
+			Collision c = checkForCollision(triangle, aLocation, aDirection);
 			if (c != null) {
 				result.add(c);
 			}

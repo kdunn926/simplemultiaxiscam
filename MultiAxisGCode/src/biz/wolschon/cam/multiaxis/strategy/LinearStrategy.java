@@ -43,7 +43,7 @@ public class LinearStrategy implements IStrategy {
 		double max = mModel.getMax(mAxis);
 		while (current < max) {
 			currentLocation[mAxis.ordinal()] = current;
-			mNextStrategy.runStrategy(currentLocation);
+			mNextStrategy.runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length));
 			current += mStep;
 		}
 	}
