@@ -151,6 +151,12 @@ public class Trigonometry {
 			machinePosition[plane[0].ordinal()] = rotated[0]; 
 			machinePosition[plane[1].ordinal()] = rotated[1];
 			machinePosition[rotationAxis.ordinal()] += angle;
+			while (machinePosition[rotationAxis.ordinal()] > 360) {
+				machinePosition[rotationAxis.ordinal()] -= 360.0d;
+			}
+			while (machinePosition[rotationAxis.ordinal()] < 0) {
+				machinePosition[rotationAxis.ordinal()] += 360.0d;
+			}
 
 	}
 
