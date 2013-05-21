@@ -100,8 +100,13 @@ public class StrategyCreationPanel extends JPanel {
 		private JList secondAxis = new JList(Axis.values());
 		private JTextField secondAxisStep = new JTextField("1");
 		private JList cuttingDirection = new JList(LinearStrategy.Direction.values());
+		private boolean initialized = false;
 		@Override
 		public JPanel getPanel() {
+			if (initialized) {
+				return this;
+			}
+			initialized = true;
 			JPanel panel = this;
 			panel.setLayout(new GridLayout(5, 2));
 
@@ -149,8 +154,13 @@ public class StrategyCreationPanel extends JPanel {
 		private JList secondAxis = new JList(Axis.values());
 		private JTextField secondAxisStep = new JTextField("1");
 		private JList cuttingDirection = new JList(LinearStrategy.Direction.values());
+		private boolean initialized = false;
 		@Override
 		public JPanel getPanel() {
+			if (initialized) {
+				return this;
+			}
+			initialized = true;
 			JPanel panel = this;
 			panel.setLayout(new GridLayout(5, 2));
 
@@ -217,8 +227,13 @@ public class StrategyCreationPanel extends JPanel {
 		private JTextField diameter = new JTextField("1.0");
 		private JTextField length 	= new JTextField("10.0");
 		private JTextField shaftDiameter = new JTextField("0.5");
+		private boolean initialized = false;
 		@Override
 		public JPanel getPanel() {
+			if (initialized) {
+				return this;
+			}
+			initialized = true;
 			JPanel panel = this;
 			panel.setLayout(new GridLayout(3, 1));
 
@@ -248,8 +263,13 @@ public class StrategyCreationPanel extends JPanel {
 		private JTextField length = new JTextField("10.0");
 		private JTextField cutterLength = new JTextField("5.0");
 		private JTextField shaftDiameter = new JTextField("0.5");
+		private boolean initialized = false;
 		@Override
 		public JPanel getPanel() {
+			if (initialized) {
+				return this;
+			}
+			initialized = true;
 			JPanel panel = this;
 			panel.setLayout(new GridLayout(4, 2));
 
@@ -301,7 +321,6 @@ public class StrategyCreationPanel extends JPanel {
 		mainPanel.add(mTools, null);
 		onToolChanged(TOOL0);
 
-		//TODO: Replace dummy JLabels with actual inputs.
 		mainPanel.add(new JLabel("[---] tool RPM"), null);
 		mainPanel.add(new JLabel("[use model size] segment"), null);
 
