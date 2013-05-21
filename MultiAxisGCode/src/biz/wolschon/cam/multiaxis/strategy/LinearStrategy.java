@@ -23,12 +23,23 @@ public class LinearStrategy implements IStrategy {
 	 * The increment (in the current unit, e.g. "mm") we use to move along #mAxis.
 	 */
 	private double mStep;
+
+	/**
+	 * Direction of movement
+	 */
+	private Direction mDirection = Direction.Conventional;
 	/**
 	 * The next strategy to call in a chain of command.</br>
 	 * e.g. first strategy iterates along X, second along Y, third determines Z, last one writes the G-Code
 	 */
 	private IStrategy mNextStrategy;
 
+	public enum Direction {
+		Conventional,
+		Climb,
+		Meander
+	}
+	private boolean mMeanderTemp = true;
 	/**
 	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
 	 * @param aStep The increment (in the current unit, e.g. "mm") we use to move along aAxis.
@@ -41,6 +52,15 @@ public class LinearStrategy implements IStrategy {
 		this.mNextStrategy = aChild;
 	}
 
+	public void setDirection(final Direction aDirection) {
+		if (aDirection == null) {
+			throw new IllegalArgumentException("null direction given");
+		}
+		this.mDirection = aDirection;
+	}
+	public Direction getDirection() {
+		return mDirection;
+	}
 	/**
 	 * The next strategy to call in a chain of command.</br>
 	 * e.g. first strategy iterates along X, second along Y, third determines Z, last one writes the G-Code
@@ -52,10 +72,27 @@ public class LinearStrategy implements IStrategy {
 
 	@Override
 	public void runStrategy(final double aStartLocation[]) throws IOException {
+		mMeanderTemp = !mMeanderTemp;
 		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
+		double start = aStartLocation[mAxis.ordinal()];
 		double current = aStartLocation[mAxis.ordinal()];
 		double max = mModel.getMax(mAxis);
 		while (current < max) {
+			switch (mDirection) {
+				case Conventional:
+					currentLocation[mAxis.ordinal()] = current;
+					break;
+				case Climb:
+					currentLocation[mAxis.ordinal()] = (start + max) - (current - start);
+					break;
+				case Meander:
+					if (mMeanderTemp) {
+						currentLocation[mAxis.ordinal()] = current;
+					} else {
+						currentLocation[mAxis.ordinal()] = (start + max) - (current - start);
+					}
+					break;
+			}
 			currentLocation[mAxis.ordinal()] = current;
 			getNextStrategy().runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length));
 			current += mStep;
