@@ -2,6 +2,9 @@ package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * Final strategy in the chain of command.<br/>
@@ -13,6 +16,18 @@ public class GCodeWriterStrategy implements IStrategy {
 	 * Where we write our G-Code to.
 	 */
 	private Writer mOut;
+
+	/**
+	 * Number format to use for G-Code.
+	 */
+	private static final DecimalFormat NUMBERFORMAT;
+	
+	static {
+		DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.ENGLISH);
+		decimalSymbol.setDecimalSeparator('.');
+		NUMBERFORMAT = new DecimalFormat("#.########", decimalSymbol);
+		NUMBERFORMAT.setGroupingUsed(false);
+	}
 	
 	/**
 	 * @param aOutput where we write our G-Code to.
@@ -54,7 +69,7 @@ public class GCodeWriterStrategy implements IStrategy {
 			throw new IllegalArgumentException("cannot format NotANumber");
 		}
 		//TODO: limit the number of decimal places
- 		return Double.toString(aNextToolLocation);
+ 		return NUMBERFORMAT.format(aNextToolLocation);
 	}
 
 	/**
