@@ -26,6 +26,11 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 import biz.wolschon.cam.multiaxis.trigonometry.Trigonometry;
 
 public class STLModel implements IModel {
+    /**
+     * Size of a binary STL header.
+     */
+    private final static int STL_HEADER_SIZE = 80;
+
 
 	public STLModel(File f) throws IOException {
 		System.out.println("loading " + f.getAbsolutePath());
@@ -35,7 +40,46 @@ public class STLModel implements IModel {
 		try {
 			String line = in.readLine();
 			if (!line.startsWith("solid")) {
-				throw new IOException("not an ASCII STL file");
+		//TODO: binary STL doesn't work yet
+				//throw new IOException("not an ASCII STL file");
+				System.out.println("not an ASCII STL file, trying binary");
+				reader.close();
+				reader = new FileReader(f);
+				in = new BufferedReader(reader);
+				in.skip(STL_HEADER_SIZE);
+				int numFaces = read4Byte(in);
+				System.out.println("polygon count in binary STL:" + numFaces);
+				for (int face = 0; face < numFaces; face++) {
+					Vector3D normal = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)));
+					Vector3D p1 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)));
+					Vector3D p2 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)));
+					Vector3D p3 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)),
+							Float.intBitsToFloat(read4Byte(in)));
+			        addTriangle(new Triangle(normal, p1, p2, p3));
+			        // skip padding
+			        int attrCountByte0 = in.read( );
+			        if (attrCountByte0 != 0) {
+			        	throw new IllegalArgumentException("Attribute byte count " + attrCountByte0 + " != 0 not supported");
+			        }
+			        int attrCountByte1 = in.read( );
+			        if (attrCountByte1 != 0) {
+			        	throw new IllegalArgumentException("Attribute byte count " + attrCountByte1 + "<<8 != 0 not supported");
+			        }
+			        
+				}
+
+				System.out.println("loaded (binary) " + this.triangles.size() + " polygons");
+				System.out.println("X: " + this.mMinX + " - " + this.mMaxX);
+				System.out.println("Y: " + this.mMinY + " - " + this.mMaxY);
+				System.out.println("Z: " + this.mMinZ + " - " + this.mMaxZ);
+				return;
 			}
 
 			while ((line = in.readLine()) != null) {
@@ -59,6 +103,13 @@ public class STLModel implements IModel {
 			in.close();
 		}
 	}
+	private int read4Byte(BufferedReader aInput) throws java.io.IOException {
+		return      aInput.read() 			& 0xFF
+				| ( aInput.read() << 8 ) 	& 0xFF00
+				| ( aInput.read() << 16 ) 	& 0xFF0000
+				| ( aInput.read() << 24 );
+	}
+
 	private java.util.List<Triangle> triangles = new ArrayList<Triangle>();
 	private double mMaxX;
 	private double mMinX;
