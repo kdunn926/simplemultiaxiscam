@@ -163,7 +163,7 @@ public class StrategyCreationPanel extends JPanel {
 		}
 		//TODO: clean this up
 		mToolPanel = (ToolSelection) aToolSelection.getPanel();
-		add(mainPanel, BorderLayout.SOUTH);
+		add(mToolPanel, BorderLayout.SOUTH);
 		invalidate();
 	}
 
