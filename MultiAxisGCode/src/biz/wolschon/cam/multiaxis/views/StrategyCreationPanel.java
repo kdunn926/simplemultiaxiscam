@@ -319,6 +319,7 @@ public class StrategyCreationPanel extends JPanel {
 			}
 		});
 		mainPanel.add(mTools, null);
+		mTools.setSelectedValue(TOOL0, true);
 		onToolChanged(TOOL0);
 
 		mainPanel.add(new JLabel("[---] tool RPM"), null);
@@ -337,6 +338,7 @@ public class StrategyCreationPanel extends JPanel {
 			}
 		});
 		mainPanel.add(mStrategies, null);
+		mainPanel.setSelectedValue(PARALLEL, true);
 		onStrategyChanged(PARALLEL);
 
 		mainPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);
