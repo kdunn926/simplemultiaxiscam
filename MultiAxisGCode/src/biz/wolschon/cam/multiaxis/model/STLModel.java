@@ -1,29 +1,24 @@
 package biz.wolschon.cam.multiaxis.model;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 import biz.wolschon.cam.multiaxis.tools.BallShape;
-import biz.wolschon.cam.multiaxis.tools.CylinderShape;
 import biz.wolschon.cam.multiaxis.tools.IToolShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
-
-import org.apache.commons.math3.geometry.euclidean.oned.Vector1D;
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
-import org.apache.commons.math3.geometry.euclidean.threed.Plane;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.util.FastMath;
-
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
-import biz.wolschon.cam.multiaxis.trigonometry.Trigonometry;
 
 public class STLModel implements IModel {
     /**
@@ -40,40 +35,12 @@ public class STLModel implements IModel {
 		try {
 			String line = in.readLine();
 			if (!line.startsWith("solid")) {
-		//TODO: binary STL doesn't work yet
 				//throw new IOException("not an ASCII STL file");
 				System.out.println("not an ASCII STL file, trying binary");
 				reader.close();
-				reader = new FileReader(f);
-				in = new BufferedReader(reader);
-				in.skip(STL_HEADER_SIZE);
-				int numFaces = read4Byte(in);
-				System.out.println("polygon count in binary STL:" + numFaces);
-				for (int face = 0; face < numFaces; face++) {
-					Vector3D normal = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)));
-					Vector3D p1 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)));
-					Vector3D p2 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)));
-					Vector3D p3 = new Vector3D(Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)),
-							Float.intBitsToFloat(read4Byte(in)));
-			        addTriangle(new Triangle(normal, p1, p2, p3));
-			        // skip padding
-			        int attrCountByte0 = in.read( );
-			        if (attrCountByte0 != 0) {
-			        	throw new IllegalArgumentException("Attribute byte count " + attrCountByte0 + " != 0 not supported");
-			        }
-			        int attrCountByte1 = in.read( );
-			        if (attrCountByte1 != 0) {
-			        	throw new IllegalArgumentException("Attribute byte count " + attrCountByte1 + "<<8 != 0 not supported");
-			        }
-			        
-				}
+				in.close();
+				in = null;
+				loadBinarySTL(f);
 
 				System.out.println("loaded (binary) " + this.triangles.size() + " polygons");
 				System.out.println("X: " + this.mMinX + " - " + this.mMaxX);
@@ -100,15 +67,73 @@ public class STLModel implements IModel {
 			System.out.println("Y: " + this.mMinY + " - " + this.mMaxY);
 			System.out.println("Z: " + this.mMinZ + " - " + this.mMaxZ);
 		} finally {
-			in.close();
+			if (in != null) {
+				in.close();
+			}
 		}
 	}
-	private int read4Byte(BufferedReader aInput) throws java.io.IOException {
-		return      aInput.read() 			& 0xFF
-				| ( aInput.read() << 8 ) 	& 0xFF00
-				| ( aInput.read() << 16 ) 	& 0xFF0000
-				| ( aInput.read() << 24 );
+
+	private void loadBinarySTL(File f) throws FileNotFoundException, IOException {
+		DataInputStream din = new DataInputStream(new BufferedInputStream(new FileInputStream(f)));
+		long skipped = din.skip(STL_HEADER_SIZE);
+		if (skipped != STL_HEADER_SIZE) {
+			System.err.println("skipped only " + skipped + " byte of header!!!");
+			}
+		int numFaces = read4Byte(din);
+		System.out.println("polygon count in binary STL:" + numFaces);
+		int expectedSize = numFaces * (12*4)+4+STL_HEADER_SIZE;
+		if (f.length() != expectedSize) {
+			System.err.print("file size is: " + f.length() + " expected:" + expectedSize);
+		} else {
+			System.out.println("file size matches our expectation");
+		}
+		for (int face = 0; face < numFaces; face++) {
+			System.out.print(".");
+			Vector3D normal = new Vector3D(Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)));
+			Vector3D p1 = new Vector3D(Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)));
+			Vector3D p2 = new Vector3D(Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)));
+			Vector3D p3 = new Vector3D(Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)),
+					Float.intBitsToFloat(read4Byte(din)));
+		    addTriangle(new Triangle(normal, p1, p2, p3));
+		    // skip padding
+		    int attrCountByte0 = din.read();
+		    if (attrCountByte0 != 0) {
+		    	throw new IllegalArgumentException("Attribute byte count " + attrCountByte0 + " != 0 not supported");
+		    }
+		    int attrCountByte1 = din.read();
+		    if (attrCountByte1 != 0) {
+		    	throw new IllegalArgumentException("Attribute byte count " + attrCountByte1 + "<<8 != 0 not supported");
+		    }
+		    
+		}
+	    din.close();
 	}
+	
+	private int read4Byte(DataInputStream aDin) throws IOException {
+		byte[] buf = new byte[4];
+		if (aDin.read(buf, 0, 4) != 4) {
+			throw new IOException("could not read 4 byte");
+		}
+		return bufferToInt(buf);
+	}
+
+
+    private final int bufferToInt(byte[] buf) {
+        return byteToInt(buf[0]) | (byteToInt(buf[1]) << 8)
+                | (byteToInt(buf[2]) << 16) | (byteToInt(buf[3]) << 24);
+    }
+
+    private final int byteToInt(byte b) {
+        return (b < 0 ? 256 + b : b);
+    }
+    
 
 	private java.util.List<Triangle> triangles = new ArrayList<Triangle>();
 	private double mMaxX;
