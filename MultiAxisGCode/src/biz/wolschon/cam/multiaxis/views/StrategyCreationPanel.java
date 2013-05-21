@@ -338,7 +338,7 @@ public class StrategyCreationPanel extends JPanel {
 			}
 		});
 		mainPanel.add(mStrategies, null);
-		mainPanel.setSelectedValue(PARALLEL, true);
+		mStrategies.setSelectedValue(PARALLEL, true);
 		onStrategyChanged(PARALLEL);
 
 		mainPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);
