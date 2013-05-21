@@ -34,7 +34,7 @@ public class Wizard1Loader extends JFrame {
 			
 			@Override
 			public String getDescription() {
-				return "ASCII STL";
+				return "STL";
 			}
 			
 			@Override
