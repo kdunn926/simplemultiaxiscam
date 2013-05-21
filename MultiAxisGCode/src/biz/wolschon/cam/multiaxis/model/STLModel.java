@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import biz.wolschon.cam.multiaxis.tools.BallShape;
+import biz.wolschon.cam.multiaxis.tools.CylinderShape;
 import biz.wolschon.cam.multiaxis.tools.IToolShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
@@ -341,27 +342,58 @@ public class STLModel implements IModel {
 		//TODO: rewrite this to use double variables instead of Vector3D to cut down on object allocation and garbage collection
 		//TODO: do the hit-test in FLOAT and if positive, calculate again to have the hit-point as DOUBLE
 
-		Vector3D pOrigin = aTriangle.getP1(); // this vector may be offset from the real world coordinates
 		Vector3D pNormal = aTriangle.getNormal();
-		double hitPointOffset = 0;
+		Vector3D hitPointOffset = null;
+		double hitPoint = -1;
 		if (aTool != null) {
-			IToolShape shape = aTool.getTipShape();
-			if (shape instanceof BallShape) {
-				BallShape ball = (BallShape) shape;
-				// move the tool up to compensate for the coordinate being of the tip and not the center of the ball
-				hitPointOffset = ball.getDiameter() / 2.0d;
-				// "move all triangles up" along sDir to compensate for the ball radius
-				pOrigin = pOrigin.add(pNormal.scalarMultiply(hitPointOffset));
+			// ceck for collisions with any part of the tool
+			IToolShape[] shapes = aTool.getShape();
+			for(IToolShape shape : shapes) {
+				Vector3D pOrigin = aTriangle.getP1(); 
+				Vector3D hitPointOffset_ = null;
+				if (shape.getLocation() > 0) {
+					hitPointOffset_ = pNormal.scalarMultiply(shape.getLocation());
+					pOrigin = pOrigin.add(hitPointOffset_);
+				}  else {
+					hitPointOffset_ = new Vector3D(0, 0, 0);
+				}
+				if (shape instanceof BallShape) {
+					BallShape ball = (BallShape) shape;
+					// move the tool up to compensate for the coordinate being of the tip and not the center of the ball
+					hitPointOffset_ = hitPointOffset_.add(pNormal.scalarMultiply(ball.getDiameter() / 2.0d));
+					// "move all triangles up" along sDir to compensate for the ball radius
+				} else if (shape instanceof CylinderShape) {
+					CylinderShape cyl = (CylinderShape) shape;
+					// move the tool sideways  to compensate for the coordinate being of the tip and not the perimeter of the cylinder
+					hitPointOffset_ = hitPointOffset_.add(pNormal.crossProduct(sDir).scalarMultiply(cyl.getDiameter() / 2.0d));
+					// "move all triangles sideways" along the component of pNormal that is orthohonal zo sDir to compensate for the cylinder radius
+				}
+				pOrigin = pOrigin.add(hitPointOffset_);
+				double d = -1.0d * (pNormal.dotProduct(pOrigin));
+				double num = pNormal.dotProduct(sPosition) + d;
+				double denom = pNormal.dotProduct(sDir);
+			
+				double hitPoint_ =  -1.0d * (num / denom);
+				if (hitPoint >= 0 && !Double.isInfinite(hitPoint) && !Double.isNaN(hitPoint)) {
+					// find the first(max hitPoint value) collision with any part of the tool
+					if (hitPoint_ > hitPoint) {
+						hitPoint = hitPoint_;
+						hitPointOffset = hitPointOffset_;
+					}
+				}
+
 			}
 			// nothing
+		} else {
+			Vector3D pOrigin = aTriangle.getP1();
+			double d = -1.0d * (pNormal.dotProduct(pOrigin));
+			double num = pNormal.dotProduct(sPosition) + d;
+			double denom = pNormal.dotProduct(sDir);
+		
+			hitPoint =  -1.0d * (num / denom);
 		}
 		
 
-		double d = -1.0d * (pNormal.dotProduct(pOrigin));
-		double num = pNormal.dotProduct(sPosition) + d;
-		double denom = pNormal.dotProduct(sDir);
-		
-		double hitPoint =  -1.0d * (num / denom);
 		if (hitPoint < 0 || Double.isInfinite(hitPoint) || Double.isNaN(hitPoint)) {
 			return null;
 		}
@@ -375,8 +407,8 @@ public class STLModel implements IModel {
 			throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
 		}
 		
-		if (hitPointOffset > 0) {
-			p = p.subtract(pNormal.scalarMultiply(hitPointOffset));
+		if (hitPointOffset != null) {
+			p = p.subtract(hitPointOffset);
 			if (p.isInfinite() || p.isNaN()) {
 				throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
 			}

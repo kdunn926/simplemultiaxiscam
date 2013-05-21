@@ -64,6 +64,7 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 
 		//do inverse kinematic using the surface normal at aCollision point as the direction we are trying to make contact from
 		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, getTool());
+		//TODO: check for collision again and use original aStartLocation if thes differ (= with the new angle for mRotationAxis some part of our tool collides with the part) 
 
 		getNextStrategy().runStrategy(aStartLocation);
 	}
