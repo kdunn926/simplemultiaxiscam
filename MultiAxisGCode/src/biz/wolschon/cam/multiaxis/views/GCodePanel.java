@@ -1,8 +1,5 @@
 package biz.wolschon.cam.multiaxis.views;
 
-import javax.swing.JPanel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -13,21 +10,18 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
 import javax.swing.JButton;
-import javax.swing.JList;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
-
 import biz.wolschon.cam.multiaxis.model.IModel;
-import biz.wolschon.cam.multiaxis.strategy.FollowSurfaceNormalCutStrategy;
 import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
-import biz.wolschon.cam.multiaxis.strategy.LinearStrategy;
-import biz.wolschon.cam.multiaxis.strategy.StraightZCutStrategy;
-import biz.wolschon.cam.multiaxis.trigonometry.Axis;
-import biz.wolschon.cam.multiaxis.tools.BallShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 
 /**
@@ -160,7 +154,12 @@ public class GCodePanel extends JPanel {
 				try {
 					FileWriter outfile = new FileWriter(f);
 					try {
-						//TODO: for all in codeListModel
+						int lines = codeListModel.getSize();
+						String newline = System.getProperty("line.separator");
+						for (int i = 0; i < lines; i++) {
+							outfile.write(codeListModel.get(i).toString());
+							outfile.write(newline);
+						}
 					} finally {
 						outfile.close();
 					}
