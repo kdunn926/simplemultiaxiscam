@@ -98,7 +98,7 @@ public class StrategyCreationPanel extends JPanel {
 		@Override
 		public JPanel getPanel() {
 			JPanel panel = this;
-			panel.setLayout(new GridLayout(3, 1));
+			panel.setLayout(new GridLayout(4, 2));
 
 			panel.add(new JLabel("diameter:"), null);
 			panel.add(diameter, null);
@@ -164,7 +164,7 @@ public class StrategyCreationPanel extends JPanel {
 		//TODO: clean this up
 		mToolPanel = (ToolSelection) aToolSelection.getPanel();
 		add(mainPanel, BorderLayout.SOUTH);
-		
+		invalidate();
 	}
 
 	public Tool getTool() {
