@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import biz.wolschon.cam.multiaxis.tools.BallShape;
+import biz.wolschon.cam.multiaxis.tools.CylinderShape;
+import biz.wolschon.cam.multiaxis.tools.IToolShape;
+import biz.wolschon.cam.multiaxis.tools.Tool;
+
 import org.apache.commons.math3.geometry.euclidean.oned.Vector1D;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Plane;
@@ -210,6 +215,14 @@ public class STLModel implements IModel {
 	 */
 	@Override
 	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection) {
+		return getCollisions(aLocation, aDirection, null);
+	}
+	/**
+	 * return the ID (index) or all triangles that are intersected by a ray
+	 * starting in location and racing of into direction.
+	 */
+	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection, final Tool aTool) {
+	
 		SortedSet<Collision> result = new TreeSet<Collision>(new Comparator<Collision>() {
 
 			@Override
@@ -225,8 +238,10 @@ public class STLModel implements IModel {
 				return 0;
 			}
 		});
+//TODO: optimize to not test all triangles
+//TODO: paralellize this to multiple processors
 		for (Triangle triangle : this.triangles) {
-			Collision c = checkForCollision(triangle, aLocation, aDirection);
+			Collision c = checkForCollision(triangle, aLocation, aDirection, aTool);
 			if (c != null) {
 				result.add(c);
 			}
@@ -234,7 +249,144 @@ public class STLModel implements IModel {
 		return result;
 	}
 
-	
+	private static boolean sameSide(final Vector3D p1, final Vector3D p2, final Vector3D a, final Vector3D b) {
+		Vector3D cp1 = b.subtract(a).crossProduct(p1.subtract(a));
+		Vector3D cp2 = b.subtract(a).crossProduct(p2.subtract(a));
+		return (cp1.dotProduct(cp2) >= 0.0d);
+	}
+
+	/**
+	 * Check if and at what depth the tool collides with a given triangle
+	 * @param aTool may be null. If not null the actual shape of the tool will be used
+	 * @return null or the details of the collision
+	 */
+	protected static Collision checkForCollision(Triangle aTriangle, Vector3D sPosition,
+			Vector3D sDir, final Tool aTool) {
+		//TODO: rewrite this to use double variables instead of Vector3D to cut down on object allocation and garbage collection
+		//TODO: do the hit-test in FLOAT and if positive, calculate again to have the hit-point as DOUBLE
+
+		Vector3D pOrigin = aTriangle.getP1(); // this vector may be offset from the real world coordinates
+		Vector3D pNormal = aTriangle.getNormal();
+		double hitPointOffset = 0;
+		if (aTool != null) {
+			IToolShape shape = aTool.getTipShape();
+			if (shape instanceof BallShape) {
+				BallShape ball = (BallShape) shape;
+				// move the tool up to compensate for the coordinate being of the tip and not the center of the ball
+				hitPointOffset = ball.getDiameter() / 2.0d;
+				// "move all triangles up" along sDir to compensate for the ball radius
+				pOrigin = pOrigin.add(pNormal.scalarMultiply(hitPointOffset));
+			}
+			// nothing
+		}
+		
+
+		double d = -1.0d * (pNormal.dotProduct(pOrigin));
+		double num = pNormal.dotProduct(sPosition) + d;
+		double denom = pNormal.dotProduct(sDir);
+		
+		double hitPoint =  -1.0d * (num / denom);
+		if (hitPoint < 0 || Double.isInfinite(hitPoint) || Double.isNaN(hitPoint)) {
+			return null;
+		}
+		Vector3D sDirMult = sDir.scalarMultiply(hitPoint);
+		if (sDirMult.isInfinite() || sDirMult.isNaN()) {
+			throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
+		}
+		
+		Vector3D p = sPosition.add(sDirMult);
+		if (p.isInfinite() || p.isNaN()) {
+			throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
+		}
+		
+		if (hitPointOffset > 0) {
+			p = p.subtract(pNormal.scalarMultiply(hitPointOffset));
+			if (p.isInfinite() || p.isNaN()) {
+				throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
+			}
+			
+		}
+		//--------------------
+		// is the hit point inside the triangle and not just instide the plane?
+		// from http://www.blackpawn.com/texts/pointinpoly/default.html
+
+		//return isInside0(p, aTriangle);
+
+		/*if (isInside1(p, aTriangle)) {
+			double  u = 0;
+			double  v = 0; //TODO: test this algorithm and remove u and v if it works
+			return new Collision(aTriangle, p, u, v);
+		}
+		return null;*/
+
+		return isInside2(p, aTriangle);
+	}
+
+	private static Collision isInside0(final Vector3D p, final Triangle aTriangle) {
+		// Compute vectors        
+		Vector3D v0 = aTriangle.getP3().subtract(aTriangle.getP1());
+		Vector3D v1 = aTriangle.getP2().subtract(aTriangle.getP1());
+		Vector3D v2 = p.subtract(aTriangle.getP1());
+
+		// Compute dot products
+		double dot00 = v0.dotProduct(v0);
+		double dot01 = v0.dotProduct(v1);
+		double dot02 = v0.dotProduct(v2);
+		double dot11 = v1.dotProduct(v1);
+		double dot12 = v1.dotProduct(v2);
+
+		// Compute barycentric coordinates
+		double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+		double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+		double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+		// Check if point is in triangle
+		boolean inTriangle = (u >= 0) && (v >= 0) && (u + v <= 1);
+		if (!inTriangle) {
+			return null;
+		}
+		return new Collision(aTriangle, p, u, v);
+	}
+
+	private static boolean isInside1(final Vector3D p, final Triangle aTriangle) {
+		if (!sameSide(p, aTriangle.getP1(), aTriangle.getP2(), aTriangle.getP3())) {
+			return false;
+		}
+		if (!sameSide(p, aTriangle.getP2(), aTriangle.getP1(), aTriangle.getP3())) {
+			return false;
+		}
+		if (!sameSide(p, aTriangle.getP3(), aTriangle.getP2(), aTriangle.getP1())) {
+			return false;
+		}
+		
+		return true;
+	}
+	private static Collision isInside2(final Vector3D p, final Triangle aTriangle) {
+		//TODO: optimize this to reduce object creation
+		//TODO: remove u and v as output and change everything in here to float (good enough for a hit-test)
+		Vector3D v0 = aTriangle.getP3().subtract(aTriangle.getP1());
+		Vector3D v1 = aTriangle.getP2().subtract(aTriangle.getP1());
+		Vector3D v2 = p.subtract(aTriangle.getP1());
+
+		double dot00 = v0.dotProduct(v0);
+		double dot01 = v0.dotProduct(v1);
+		double dot02 = v0.dotProduct(v2);
+		double dot11 = v1.dotProduct(v1);
+		double dot12 = v1.dotProduct(v2);
+
+		double invD = 1.0d / (dot00 * dot11 - dot01 * dot01);
+
+		// Barycentric coordinates
+		double u = (dot11 * dot02 - dot01 * dot12) * invD;
+		double v = (dot00 * dot12 - dot01 * dot02) * invD;
+
+		if (u <= 0.0d || v <= 0.0d || u+v >= 1.0d) {
+			return null;
+		}
+		return new Collision(aTriangle, p, u, v);
+
+	}
+	/*
 	protected static Collision checkForCollision(Triangle triangle, Vector3D location,
 			Vector3D direction) {
 
@@ -275,6 +427,7 @@ public class STLModel implements IModel {
 		}
 		return new Collision(triangle, p, u, v);
 	}
+*/
 
 	@Override
 	public int getTriangleCount() {

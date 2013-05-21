@@ -25,18 +25,17 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 	 * surface along the surface normal of the final object being cut in the rotational plane of that axis.
 	 */
 	private Axis mRotationAxis;
-	private IModel mModel;
-	private IStrategy mNext;
-	private Tool mTool;
-
+	
 	/**
 	 * Given an already determined position for a rotational axis, try to move all axis to have hit the
 	 * surface along the surface normal of the final object being cut in the rotational plane of that axis.
-	 * @param aModel
+	 * @param aTool The tool we are cutting with. (to determine collisions of tool and part)
+	 * @param aModel The part we are trying to mill. (to detemine the Z depth to cut)
 	 * @param aRotationAxis the rotation axis(value determined by a previous strategy) we are using
+	 * @param aNext The next strategy to call
 	 */
 	public FollowSurfaceNormalCutStrategy(IModel aModel, final Axis aRotationAxis, final IStrategy aNext, final Tool aTool) {
-		super(aModel, aNext);
+		super(aModel, aNext, aTool);
 		if (aRotationAxis.isLinearAxis()) {
 			throw new IllegalArgumentException("no a rotation axis");
 		}
@@ -44,26 +43,29 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 			throw new IllegalArgumentException("no tool given");
 		}
 		this.mRotationAxis= aRotationAxis;
-		this.mNext = aNext;
-		this.mModel = aModel;
-		this.mTool  = aTool;
 	}
 
+	/**
+	 * The usual case of cutting a point on the (convex) surface.
+	 * @param aCollision The point of cutting.
+	 * @param aStartLocation the tool coordinates (X,Y,Z, possibly A, B and maybe even C rotational axis too) to reach #aCollision
+	 */
 	@Override
 	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision) throws IOException {
-		//TODO: do inverse kinematic using the surface normal at aCollision
 		Triangle polygon = aCollision.getCollidingPolygon();
 		Vector3D normal	 = polygon.getNormal();
-System.out.println("FollowSurfaceNormalCutStrategy normal=" + normal.toString());
+		//System.out.println("DEBUG: FollowSurfaceNormalCutStrategy normal=" + normal.toString());
 		//Vector3D point   = aCollision.getCollisionPoint(); 
 
 		aStartLocation[Axis.X.ordinal()] = aCollision.getCollisionPoint().getX();
 		aStartLocation[Axis.Y.ordinal()] = aCollision.getCollisionPoint().getY();
 		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
 		aStartLocation[Axis.A.ordinal()] = 0;
-		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, mTool);
 
-		this.mNext.runStrategy(aStartLocation);
+		//do inverse kinematic using the surface normal at aCollision point as the direction we are trying to make contact from
+		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, getTool());
+
+		getNextStrategy().runStrategy(aStartLocation);
 	}
 
 }

@@ -27,6 +27,9 @@ public enum Axis {
 			return v.getZ();
 		}
 	},
+	/**
+	 * The rotation axis A commonly rotates around the X axis and thus in the Z+Y plane.
+	 */
 	A(X) {
 		@Override
 		public double get(Vector3D v) {
@@ -39,6 +42,9 @@ public enum Axis {
 			return rot;
 		}
 	},
+	/**
+	 * The rotation axis B commonly rotates around the Y axis and thus in the Z+X plane.
+	 */
 	B(Y) {
 		@Override
 		public double get(Vector3D v) {
@@ -51,6 +57,9 @@ public enum Axis {
 			return rot;
 		}
 	},
+	/**
+	 * The rotation axis C commonly rotates around the Z axis and thus in the X+Y plane.
+	 */
 	C(Z) {
 		@Override
 		public double get(Vector3D v) {
@@ -63,24 +72,52 @@ public enum Axis {
 			return rot;
 		}
 	};
+	/**
+	 * True if this is a linear and false if this is a rotation axis.
+	 * @see #rotatesAround
+	 */
 	private boolean isLinearAxis;
+	/*
+	 * @return True if this is a linear and false if this is a rotation axis
+	 */
 	public boolean isLinearAxis() {
 		return isLinearAxis;
 	}
-	private Axis 	rotatesAround;
+	/**
+	 * Null for linear axis.
+	 * @see #isLinearAxis
+	 */
+	private Axis rotatesAround;
+	/**
+	 * Internal constructor for a linear axis.
+	 */
 	private Axis() {
 		isLinearAxis = true;
 	}
+	/**
+	 * Internal constructor for a rotation axis.
+	 * @param u see #rotatesAround
+	 */
 	private Axis(final Axis u) {
 		isLinearAxis = false;
 		rotatesAround = u;
 	}
+	/**
+	 * It is an error to call this on a linear axis.
+	 * @see #isLinearAxis()
+	 * @return the axis we rotate around (counterclockwise)
+	 */
 	public Axis getRotatesAround() {
 		if (isLinearAxis) {
 			throw new IllegalStateException("call only valid for rotational axis");
 		}
 		return rotatesAround ;
 	}
+	/**
+	 * It is an error to call this on a linear axis.
+	 * @see #isLinearAxis()
+	 * @return the plane of rotation (counterclockwise rotation). Always exactly 2 elements.
+	 */
 	public Axis[] getRotationPlane() {
 		if (isLinearAxis) {
 			throw new IllegalStateException("call only valid for rotational axis");
@@ -93,7 +130,17 @@ public enum Axis {
 		}
 		return new Axis[] {X,Y};
 	}
+	/**
+	 * It is an error to call this method on a rotational axis since 3D vectors don't contain that information.
+	 * Only machine coordinates to (arrays of double).
+	 * @return the element of the given vector that corresponds to this axis.
+	 */
 	public abstract double get(Vector3D vector3d);
+	/**
+	 * It is an error to call this method on a linear axis.
+	 * @return a rotational matrix for the given rotation
+	 * @param degrees how far to rotate counterclockwise in degrees.
+	 */
 	public Rotation getRotation(double degrees) {
 		throw new IllegalStateException("not defined for linear axis");
 	}

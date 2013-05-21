@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,6 +16,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.strategy.FollowSurfaceNormalCutStrategy;
@@ -56,6 +60,7 @@ public class GCodePanel extends JPanel {
 	 */
 	private IModel mModel;
 	private JList codeList;
+	private JButton mSaveButton;
 	private DefaultListModel codeListModel;
 	private StrategyCreationPanel mStrategyPanel;
 	private ModelReviewPanel mReviewTab;
@@ -75,6 +80,17 @@ public class GCodePanel extends JPanel {
 		this.mStrategyPanel = aStrategyPanel;
 		setLayout(new BorderLayout(0, 0));
 		
+		mSaveButton = new JButton("save");
+		mSaveButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				onSaveFile();
+			}
+		});
+		add(mSaveButton, BorderLayout.SOUTH);
+		mSaveButton.setEnabled(false);
+		
 		JScrollPane scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
 		
@@ -87,6 +103,7 @@ public class GCodePanel extends JPanel {
 				btnGenerateGcode.setEnabled(false);
 				Thread t = new Thread() {
 					public void run() {
+						mSaveButton.setEnabled(true);
 						onGenerateGCode();
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
@@ -118,9 +135,54 @@ public class GCodePanel extends JPanel {
 		scrollPane.setViewportView(codeList);
 	}
 
+	protected void onSaveFile() {
+		mSaveButton.setEnabled(false);
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new FileFilter() {
+			@Override
+			public String getDescription() {
+				return "G-Code";
+			}
+			
+			@Override
+			public boolean accept(File file) {
+				return file.getName().toLowerCase().endsWith(".ngc");
+			}
+		});
+		File testdir = new File(System.getProperty("user.dir"), "test");
+		chooser.setCurrentDirectory(testdir);
+		chooser.setSelectedFile(new File(testdir, "cube.ngc"));
+		chooser.showSaveDialog(this);
+		final File f = chooser.getSelectedFile();
+		Thread t = new Thread() {
+			public void run() {
+				//do the actual saving
+				try {
+					FileWriter outfile = new FileWriter(f);
+					try {
+						//TODO: for all in codeListModel
+					} finally {
+						outfile.close();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				EventQueue.invokeLater(new Runnable() {
+							public void run() {
+								mSaveButton.setEnabled(true);
+							}
+						});
+
+			}
+		};
+		t.start();
+		
+	}
 	protected void onGenerateGCode() {
 		try {
-			FileWriter outfile = new FileWriter("/tmp/out.gcode");
+			// always write to a temporary file
+			// TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
+			FileWriter outfile = new FileWriter("/tmp/out-" + System.currentTimeMillis() + ".gcode");
 			mTool = mStrategyPanel.getTool();
 			GCodeWriterStrategy out = new GCodeWriterStrategy(outfile) {
 				@Override
@@ -132,8 +194,8 @@ public class GCodePanel extends JPanel {
 			IStrategy strategy = mStrategyPanel.getStrategy(out, mModel);
 			try {
 				double[] startLocation = new double[] {
-						mModel.getCenterX(),
-						mModel.getMinY(),
+						mModel.getMinX(),
+						mModel.getCenterY(),
 						mModel.getCenterZ(),
 						0 // A axis
 						// no B axis
@@ -141,6 +203,7 @@ public class GCodePanel extends JPanel {
 				strategy.runStrategy(startLocation);
 				strategy.endStrategy();
 			} finally {
+				outfile.flush();
 				outfile.close();
 			}
 		} catch (IOException e) {

@@ -49,6 +49,7 @@ public class Wizard1Loader extends JFrame {
 		File f = chooser.getSelectedFile();
 		STLModel model = new STLModel(f);
 		mListener.onFileLoaded(model);
+		setVisible(false);
 	}
 
 }

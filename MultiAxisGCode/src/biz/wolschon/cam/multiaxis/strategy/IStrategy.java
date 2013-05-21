@@ -11,8 +11,14 @@ import java.io.IOException;
  */
 public interface IStrategy {
 
+	/**
+	 * Called by the parent strategy. Usually in a loop.
+	 * @param startLocation some axis are already filled by the parent strategy.
+	 */
 	void runStrategy(double startLocation[]) throws IOException;
 
-
+	/**
+	 * Call this after the last call to #runStrategy(double[]) to clean up and finalize.
+	 */
 	void endStrategy() throws IOException;
 }
