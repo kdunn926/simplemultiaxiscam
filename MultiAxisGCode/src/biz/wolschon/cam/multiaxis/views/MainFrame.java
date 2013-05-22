@@ -29,7 +29,9 @@ public class MainFrame extends JFrame {
 						public void run() {
 							try {
 								MainFrame frame = new MainFrame(aModel);
+								frame.pack();
 								frame.setVisible(true);
+								frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -38,8 +40,8 @@ public class MainFrame extends JFrame {
 					
 				}
 			});
-			step1.pack();
-			step1.setVisible(true);
+			//step1.pack();
+			//step1.setVisible(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -17,7 +17,7 @@ import biz.wolschon.cam.multiaxis.model.STLModel;
  * @author marcuswolschon
  *
  */
-public class Wizard1Loader extends JFrame {
+public class Wizard1Loader  {
 
 	public interface Listener {
 
@@ -45,11 +45,10 @@ public class Wizard1Loader extends JFrame {
 		File testdir = new File(System.getProperty("user.dir"), "test");
 		chooser.setCurrentDirectory(testdir);
 		chooser.setSelectedFile(new File(testdir, "cube.stl"));
-		chooser.showOpenDialog(this);
+		chooser.showOpenDialog(null);
 		File f = chooser.getSelectedFile();
 		STLModel model = new STLModel(f);
 		mListener.onFileLoaded(model);
-		setVisible(false);
 	}
 
 }

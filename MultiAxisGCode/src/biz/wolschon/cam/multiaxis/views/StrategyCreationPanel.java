@@ -1,42 +1,37 @@
 package biz.wolschon.cam.multiaxis.views;
 
-import javax.swing.JPanel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
 import javax.swing.JList;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
+import biz.wolschon.cam.multiaxis.strategy.ChainStrategy;
 import biz.wolschon.cam.multiaxis.strategy.FollowSurfaceNormalCutStrategy;
 import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
 import biz.wolschon.cam.multiaxis.strategy.LinearStrategy;
 import biz.wolschon.cam.multiaxis.strategy.StraightZCutStrategy;
-import biz.wolschon.cam.multiaxis.strategy.ChainStrategy;
-import biz.wolschon.cam.multiaxis.trigonometry.Axis;
-import biz.wolschon.cam.multiaxis.tools.BallShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
+import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
 /**
  * Panel to enter all tool and strategy information.
  */
 public class StrategyCreationPanel extends JPanel {
 
+	/**
+	 * For Serializable.
+	 */
+	private static final long serialVersionUID = 8504617103443377316L;
 	/**
 	 * Parent for the parameter settings for tools and strategy.
 	 */
@@ -94,7 +89,8 @@ public class StrategyCreationPanel extends JPanel {
 	/**
 	 * A parallel strategy moving along 2 axis.
 	 */
-	private static final StrategySelection PARALLEL = new StrategySelection("Parallel") {		private JTextField diameter = new JTextField("1.0");
+	private static final StrategySelection PARALLEL = new StrategySelection("Parallel") {
+		private JTextField diameter = new JTextField("1.0");
 		private JList firstAxis 	= new JList(Axis.values());
 		private JTextField firstAxisStep = new JTextField("0.33");
 		private JList secondAxis = new JList(Axis.values());
@@ -318,8 +314,9 @@ public class StrategyCreationPanel extends JPanel {
 				
 			}
 		});
-		mainPanel.add(mTools, null);
+		mainPanel.add(new JScrollPane(mTools), null);
 		mTools.setSelectedValue(TOOL0, true);
+		mTools.setVisibleRowCount(1);
 		onToolChanged(TOOL0);
 
 		mainPanel.add(new JLabel("[---] tool RPM"), null);
@@ -337,8 +334,9 @@ public class StrategyCreationPanel extends JPanel {
 				
 			}
 		});
-		mainPanel.add(mStrategies, null);
+		mainPanel.add(new JScrollPane(mStrategies), null);
 		mStrategies.setSelectedValue(PARALLEL, true);
+		mStrategies.setVisibleRowCount(1);
 		onStrategyChanged(PARALLEL);
 
 		mainPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);

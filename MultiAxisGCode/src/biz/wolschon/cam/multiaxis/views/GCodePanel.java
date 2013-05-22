@@ -30,6 +30,10 @@ import biz.wolschon.cam.multiaxis.tools.Tool;
 public class GCodePanel extends JPanel {
 
 	/**
+	 * For serializable.
+	 */
+	private static final long serialVersionUID = -6893843077156524310L;
+	/**
 	 * Helper-class for the ListModel.
 	 * Wraps a line of G-Code to display and the corresponding tool-location.
 	 */
@@ -206,7 +210,7 @@ public class GCodePanel extends JPanel {
 				double[] startLocation = new double[] {
 						mModel.getMinX(),
 						mModel.getCenterY(),
-						mModel.getCenterZ(),
+						mModel.getMaxZ() + 1,
 						0 // A axis
 						// no B axis
 				};
