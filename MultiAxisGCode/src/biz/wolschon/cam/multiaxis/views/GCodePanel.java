@@ -38,8 +38,14 @@ public class GCodePanel extends JPanel {
 		private double[] mToolLocation;
 		public GCodeLine (final String aLine, final double[] aToolLocation) {
 			this.mLine = aLine;
-			this.mToolLocation = Arrays.copyOf(aToolLocation, aToolLocation.length);
+			if (aToolLocation != null) {
+				this.mToolLocation = Arrays.copyOf(aToolLocation, aToolLocation.length);
+			}
 		}
+		/**
+		 * 
+		 * @return May be null in header
+		 */
 		public double[] getToolLocation() {
 			return mToolLocation;
 		}
@@ -120,9 +126,13 @@ public class GCodePanel extends JPanel {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				GCodeLine line = (GCodeLine) codeList.getSelectedValue();
-				System.out.println("selected: '" + line + "' " + Arrays.toString(line.getToolLocation()));
+				double[] toolLocation = line.getToolLocation();
+				if (toolLocation == null) {
+					return; // header
+				}
+				System.out.println("selected: '" + line + "' " + Arrays.toString(toolLocation));
 				mReviewTab.setTool(mTool);
-				mReviewTab.setToolLocation(line.getToolLocation());
+				mReviewTab.setToolLocation(toolLocation);
 				
 			}
 		});

@@ -31,10 +31,13 @@ public class GCodeWriterStrategy implements IStrategy {
 	
 	/**
 	 * @param aOutput where we write our G-Code to.
+	 * @throws IOException 
 	 */
-	public GCodeWriterStrategy(final Writer aOutput) {
+	public GCodeWriterStrategy(final Writer aOutput) throws IOException {
 		this.mOut = aOutput;
-		//TODO: write a G-Code header (use metric coordinates, spin up the spindle)
+		//write a G-Code header (use metric coordinates, spin up the spindle)
+		writeCodeLine("G17 G21 G40 G49 G64 G90 G94\n", null);
+		writeCodeLine("S5000 M03\n", null);
 	}
 
 	/**
