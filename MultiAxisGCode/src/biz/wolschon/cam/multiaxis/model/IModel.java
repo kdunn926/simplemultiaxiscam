@@ -1,6 +1,5 @@
 package biz.wolschon.cam.multiaxis.model;
 
-import java.util.List;
 import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
