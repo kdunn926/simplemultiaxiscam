@@ -57,7 +57,7 @@ public class GCodeWriterStrategy implements IStrategy {
 		if (aNextToolLocation.length > 4) {
 			sb.append(" B").append(formatCoordinate(aNextToolLocation[4]));
 		}
-		sb.append("\n");
+		sb.append(" F100\n"); //TODO: get speeds from strategies
 		writeCodeLine(sb.toString(), aNextToolLocation);
 		
 		System.out.print(sb.toString()); //TODO: debug output
