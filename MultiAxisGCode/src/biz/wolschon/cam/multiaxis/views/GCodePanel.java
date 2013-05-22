@@ -208,7 +208,7 @@ public class GCodePanel extends JPanel {
 			IStrategy strategy = mStrategyPanel.getStrategy(out, mModel);
 			try {
 				double[] startLocation = new double[] {
-						mModel.getMinX(),
+						mModel.getCenterX(),
 						mModel.getCenterY(),
 						mModel.getMaxZ() + 1,
 						0 // A axis

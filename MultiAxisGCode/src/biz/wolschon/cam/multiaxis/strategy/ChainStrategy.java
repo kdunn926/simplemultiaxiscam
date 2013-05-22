@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Strategy to call 2 child strategies.<br/>
@@ -49,8 +50,9 @@ public class ChainStrategy implements IStrategy {
 
 	@Override
 	public void runStrategy(final double aStartLocation[]) throws IOException {
+		double aStartLocation2[] = Arrays.copyOf(aStartLocation, aStartLocation.length);
 		getNextStrategy0().runStrategy(aStartLocation);
-		getNextStrategy1().runStrategy(aStartLocation);
+		getNextStrategy1().runStrategy(aStartLocation2);
 	}
 
 	/**

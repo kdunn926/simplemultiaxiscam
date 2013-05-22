@@ -77,8 +77,8 @@ public class LinearStrategy implements IStrategy {
 			// TODO: raise tool and move it to the start position without colliding with the object
 		}
 		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
-		double start = aStartLocation[mAxis.ordinal()];
-		double current = aStartLocation[mAxis.ordinal()];
+		double start = mModel.getMin(mAxis);
+		double current = start;
 		double max = mModel.getMax(mAxis);
 		while (current < max) {
 			switch (mDirection) {
