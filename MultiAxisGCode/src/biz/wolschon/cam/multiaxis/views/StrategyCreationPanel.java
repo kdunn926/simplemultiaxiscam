@@ -184,15 +184,15 @@ public class StrategyCreationPanel extends JPanel {
 		}
 		public IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy) {
 			
-			LinearStrategy aroundAAxis0 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
-			LinearStrategy alongXAxis0 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aroundAAxis0);
-			aroundAAxis0.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
+			LinearStrategy child0 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
+			LinearStrategy parent0 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), child0);
+			child0.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
-			LinearStrategy alongXAxis1 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aNextStrategy);
-			LinearStrategy aroundAAxis1 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), alongXAxis1);
-			alongXAxis1.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
+			LinearStrategy child1 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aNextStrategy);
+			LinearStrategy parent1 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), parent0);
+			child1.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
-			return new ChainStrategy(alongXAxis0, aroundAAxis1);
+			return new ChainStrategy(parent0, parent1);
 		}
 	};
 	/**
@@ -371,7 +371,7 @@ public class StrategyCreationPanel extends JPanel {
 	 */
 	private void onStrategyChanged(final StrategySelection aStrategySelection) {
 		if (mStrategyPanel != null) {
-			mParameterSettings.remove(mToolPanel);
+			mParameterSettings.remove(mStrategyPanel);
 			mStrategyPanel = null;
 		}
 		//TODO: clean this up
