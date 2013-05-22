@@ -183,6 +183,7 @@ public class GCodePanel extends JPanel {
 			// TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
 			FileWriter outfile = new FileWriter("/tmp/out-" + System.currentTimeMillis() + ".gcode");
 			mTool = mStrategyPanel.getTool();
+			codeListModel.clear();
 			GCodeWriterStrategy out = new GCodeWriterStrategy(outfile) {
 				@Override
 				protected void writeCodeLine(final String aLine, final double[] aLocation) throws IOException {
