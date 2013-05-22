@@ -1,7 +1,6 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 

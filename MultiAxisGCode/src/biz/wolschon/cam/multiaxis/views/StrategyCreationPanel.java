@@ -189,7 +189,7 @@ public class StrategyCreationPanel extends JPanel {
 			child0.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
 			LinearStrategy child1 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aNextStrategy);
-			LinearStrategy parent1 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), parent0);
+			LinearStrategy parent1 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), child1);
 			child1.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
 			return new ChainStrategy(parent0, parent1);

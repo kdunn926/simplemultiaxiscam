@@ -12,7 +12,7 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
  * @author marcuswolschon
  *
  */
-public class LinearStrategy implements IStrategy {
+public class LinearStrategy implements IStrategy, IProgressListener {
 
 	private IModel mModel;
 	/**
@@ -40,6 +40,9 @@ public class LinearStrategy implements IStrategy {
 		Meander
 	}
 	private boolean mMeanderTemp = true;
+	private long mProgressMax;
+	private int mProgress;
+	private IProgressListener mProgressListener;
 	/**
 	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
 	 * @param aStep The increment (in the current unit, e.g. "mm") we use to move along aAxis.
@@ -80,6 +83,8 @@ public class LinearStrategy implements IStrategy {
 		double start = mModel.getMin(mAxis);
 		double current = start;
 		double max = mModel.getMax(mAxis);
+		this.mProgressMax = (long) ((max - start) / mStep);
+		this.mProgress    = 0;
 		while (current < max) {
 			switch (mDirection) {
 				case Conventional:
@@ -98,6 +103,7 @@ public class LinearStrategy implements IStrategy {
 			}
 			getNextStrategy().runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length));
 			current += mStep;
+			this.mProgress++;
 		}
 	}
 
@@ -105,5 +111,17 @@ public class LinearStrategy implements IStrategy {
 	public void endStrategy()  throws IOException {
 		// we have nothing to finish/clean up but maybe the next strategy has.
 		getNextStrategy().endStrategy();
+	}
+
+	public void addProgressListener(final IProgressListener aListener) {
+		this.mProgressListener = aListener;
+		getNextStrategy().addProgressListener(this);
+	}
+
+	@Override
+	public void onProgressChanged(IStrategy aSender, long aProgress,
+			long aMaximum) {
+		this.mProgressListener.onProgressChanged(this, mProgress * aMaximum + aProgress, aMaximum * mProgressMax);
+		
 	}
 }

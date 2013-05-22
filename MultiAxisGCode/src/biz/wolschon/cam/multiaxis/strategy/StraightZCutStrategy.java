@@ -1,7 +1,6 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -18,7 +17,7 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
  * @author marcuswolschon
  *
  */
-public class StraightZCutStrategy implements IStrategy {
+public class StraightZCutStrategy implements IStrategy, IProgressListener {
 
 	/**
 	 * The part we are trying to mill.
@@ -33,6 +32,7 @@ public class StraightZCutStrategy implements IStrategy {
 	 * The tool we are cutting with.
 	 */
 	private Tool mTool;
+	private IProgressListener mProgressListener;
 
 	/**
 	 * @param aTool The tool we are cutting with. (to determine collisions of tool and part)
@@ -136,5 +136,17 @@ public class StraightZCutStrategy implements IStrategy {
 	public void endStrategy()  throws IOException {
 		// we have nothing to finish/clean up but maybe the next strategy has.
 		getNextStrategy().endStrategy();
+	}
+
+	public void addProgressListener(final IProgressListener aListener) {
+		this.mProgressListener = aListener;
+		getNextStrategy().addProgressListener(this);
+	}
+
+	@Override
+	public void onProgressChanged(IStrategy aSender, long aProgress,
+			long aMaximum) {
+		this.mProgressListener.onProgressChanged(this, aProgress, aMaximum);
+		
 	}
 }

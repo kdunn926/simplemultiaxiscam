@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @author marcuswolschon
  *
  */
-public class ChainStrategy implements IStrategy {
+public class ChainStrategy implements IStrategy, IProgressListener {
 	/**
 	 * The first of the two next strategies to call in a chain of command.</br>
 	 * e.g. first strategy iterates along X, second along Y, third determines Z, last one writes the G-Code
@@ -20,6 +20,7 @@ public class ChainStrategy implements IStrategy {
 	 * e.g. first strategy iterates along X, second along Y, third determines Z, last one writes the G-Code
 	 */
 	private IStrategy mNextStrategy1;
+	private IProgressListener mProgressListener;
 
 	/**
 	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
@@ -61,5 +62,20 @@ public class ChainStrategy implements IStrategy {
 	@Override
 	public void endStrategy()  throws IOException {
 		getNextStrategy1().endStrategy();
+	}
+
+	public void addProgressListener(final IProgressListener aListener) {
+		this.mProgressListener = aListener;
+		getNextStrategy0().addProgressListener(this);
+		getNextStrategy1().addProgressListener(this);
+	}
+
+	@Override
+	public void onProgressChanged(final IStrategy aSender, final long aProgress, final long aMaximum) {
+	
+		if (aSender == getNextStrategy0()) {
+			this.mProgressListener.onProgressChanged(this, aProgress, aMaximum * 2);
+		}
+		this.mProgressListener.onProgressChanged(this, aMaximum + aProgress, aMaximum * 2);
 	}
 }

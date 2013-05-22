@@ -21,4 +21,6 @@ public interface IStrategy {
 	 * Call this after the last call to #runStrategy(double[]) to clean up and finalize.
 	 */
 	void endStrategy() throws IOException;
+
+	public void addProgressListener(final IProgressListener aListener);
 }

@@ -17,6 +17,8 @@ public class GCodeWriterStrategy implements IStrategy {
 	 */
 	private Writer mOut;
 
+	private IProgressListener mProgressListener;
+
 	/**
 	 * Number format to use for G-Code.
 	 */
@@ -62,6 +64,9 @@ public class GCodeWriterStrategy implements IStrategy {
 		
 		System.out.print(sb.toString()); //TODO: debug output
 		
+		if (this.mProgressListener != null) {
+			this.mProgressListener.onProgressChanged(this,  1,  1);
+		}
 	}
 
 	private String formatCoordinate(final double aNextToolLocation) {
@@ -90,5 +95,9 @@ public class GCodeWriterStrategy implements IStrategy {
 	@Override
 	public void endStrategy()  throws IOException {
 		//TODO: write G-Code footer (spin down spindle, stop program)
+	}
+
+	public void addProgressListener(final IProgressListener aListener) {
+		this.mProgressListener = aListener;
 	}
 }

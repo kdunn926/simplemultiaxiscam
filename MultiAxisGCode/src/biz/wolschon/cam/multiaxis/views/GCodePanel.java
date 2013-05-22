@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
@@ -14,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -21,13 +23,14 @@ import javax.swing.filechooser.FileFilter;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
+import biz.wolschon.cam.multiaxis.strategy.IProgressListener;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 
 /**
  * Panel to start G-Code generation and show the generated G-Code.
  */
-public class GCodePanel extends JPanel {
+public class GCodePanel extends JPanel implements IProgressListener {
 
 	/**
 	 * For serializable.
@@ -72,6 +75,8 @@ public class GCodePanel extends JPanel {
 	 * The tool we use Currently fixed to a 1.0mm ball nose cutter.
 	 */
 	private Tool mTool = new Tool(1.0d);
+	private JProgressBar mProgressBar;
+	private static final NumberFormat PERCENT_FORMAT = NumberFormat.getPercentInstance();
 
 	/**
 	 * Create the panel.<br/>
@@ -94,6 +99,9 @@ public class GCodePanel extends JPanel {
 		});
 		add(mSaveButton, BorderLayout.SOUTH);
 		mSaveButton.setEnabled(false);
+		
+		mProgressBar = new JProgressBar();
+		add(mProgressBar, BorderLayout.NORTH);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		add(scrollPane, BorderLayout.CENTER);
@@ -214,6 +222,7 @@ public class GCodePanel extends JPanel {
 						0 // A axis
 						// no B axis
 				};
+				strategy.addProgressListener(GCodePanel.this);
 				strategy.runStrategy(startLocation);
 				strategy.endStrategy();
 			} finally {
@@ -223,6 +232,22 @@ public class GCodePanel extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+
+	@Override
+	public void onProgressChanged(IStrategy aSender, long aProgress,
+			long aMaximum) {
+		if (aMaximum > Integer.MAX_VALUE) {
+
+			mProgressBar.setMaximum(Integer.MAX_VALUE);
+			mProgressBar.setValue((int) (aProgress * Integer.MAX_VALUE / aMaximum));
+		} else {
+			mProgressBar.setMaximum((int) aMaximum);
+			mProgressBar.setValue((int) aProgress);
+		}
+		mProgressBar.setStringPainted(true);
+		mProgressBar.setString(PERCENT_FORMAT.format(((double)aProgress)/aMaximum));
 		
 	}
 
