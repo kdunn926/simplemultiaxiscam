@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -26,6 +27,10 @@ public class STLModel implements IModel {
      * Size of a binary STL header.
      */
     private final static int STL_HEADER_SIZE = 80;
+    /**
+     * Used for error reporting and debugging.
+     */
+    private int mLineCount = 0;
 
 
 	public STLModel(File f) throws IOException {
@@ -34,7 +39,7 @@ public class STLModel implements IModel {
 		FileReader reader = new FileReader(f);
 		BufferedReader in = new BufferedReader(reader);
 		try {
-			String line = in.readLine();
+			String line = readLine(in);
 			if (!line.startsWith("solid")) {
 				//throw new IOException("not an ASCII STL file");
 				System.out.println("not an ASCII STL file, trying binary");
@@ -50,7 +55,7 @@ public class STLModel implements IModel {
 				return;
 			}
 
-			while ((line = in.readLine()) != null) {
+			while ((line = readLine(in)) != null) {
 				line = line.trim();
 				if (line.startsWith("endsolid")) {
 					System.out.println("STL: end of first solid. I'm done");
@@ -72,6 +77,11 @@ public class STLModel implements IModel {
 				in.close();
 			}
 		}
+	}
+
+	private String readLine(BufferedReader in) throws IOException {
+		mLineCount++;
+		return in.readLine();
 	}
 
 	private void loadBinarySTL(File f) throws FileNotFoundException, IOException {
@@ -147,41 +157,45 @@ public class STLModel implements IModel {
 	private void readFacet(BufferedReader in, double normalX,
 			double normalY, double normalZ) throws IOException {
 		Vector3D normal = new Vector3D(normalX, normalY, normalZ);
-		String line = in.readLine().trim();
+		String line = readLine(in).trim();
 		if (!line.startsWith("outer loop")) {
-			throw new IOException("not an ASCII STL file - no outer loop");
+			throw new IOException("not an ASCII STL file - no outer loop in line=" + mLineCount);
 		}
-		line = in.readLine().trim();
-		String[] tokens = line.split(" ");
+		line = readLine(in).trim();
+		String[] tokens = line.split("\\s+");
 		if (tokens.length != 4 || !tokens[0].equals("vertex")) {
-			throw new IOException("not an ASCII STL file - no first vertex");
+			throw new IOException("not an ASCII STL file - no first vertex in line=" + mLineCount
+					+ " tokens=" + Arrays.toString(tokens));
 		}
 		Vector3D p1 = new Vector3D(Double.parseDouble(tokens[1]),
 					Double.parseDouble(tokens[2]),
 					Double.parseDouble(tokens[3]));
-		line = in.readLine().trim();
-		tokens = line.split(" ");
+		line = readLine(in).trim();
+		tokens = line.split("\\s+");
 		if (tokens.length != 4 || !tokens[0].equals("vertex")) {
-			throw new IOException("not an ASCII STL file - no second vertex");
+			throw new IOException("not an ASCII STL file - no second vertex in line=" + mLineCount
+					+ " tokens=" + Arrays.toString(tokens));
 		}
 		Vector3D p2 = new Vector3D(Double.parseDouble(tokens[1]),
 				Double.parseDouble(tokens[2]),
 				Double.parseDouble(tokens[3]));
-		line = in.readLine().trim();
-		tokens = line.split(" ");
+		line = readLine(in).trim();
+		tokens = line.split("\\s+");
 		if (tokens.length != 4 || !tokens[0].equals("vertex")) {
-			throw new IOException("not an ASCII STL file - no third vertex after reading " +this.triangles.size() + " polygons");
+			throw new IOException("not an ASCII STL file - no third vertex after reading " +this.triangles.size()
+					+ " polygons in line=" + mLineCount
+					+ " tokens=" + Arrays.toString(tokens));
 		}
 		Vector3D p3 = new Vector3D(Double.parseDouble(tokens[1]),
 				Double.parseDouble(tokens[2]),
 				Double.parseDouble(tokens[3]));
-		line = in.readLine().trim();
+		line = readLine(in).trim();
 		if (!line.startsWith("endloop")) {
-			throw new IOException("not an ASCII STL file - no endloop");
+			throw new IOException("not an ASCII STL file - no endloop in line=" + mLineCount);
 		}
-		line = in.readLine().trim();
+		line = readLine(in).trim();
 		if (!line.startsWith("endfacet")) {
-			throw new IOException("not an ASCII STL file - no endfactet");
+			throw new IOException("not an ASCII STL file - no endfactet in line=" + mLineCount);
 		}
 		addTriangle(new Triangle(normal, p1, p2, p3));
 		
