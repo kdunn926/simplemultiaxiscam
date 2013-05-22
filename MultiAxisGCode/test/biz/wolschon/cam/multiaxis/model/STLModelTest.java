@@ -11,7 +11,8 @@ public class STLModelTest {
 	public void testCheckForCollisionEdge() {
 		Vector3D direction = new Vector3D(0, 0, -1);
 		Vector3D location = new Vector3D(0, 0, 1);
-		Triangle triangle = new Triangle(null, new Vector3D(1, 1, 0),
+		Triangle triangle = new Triangle(new Vector3D(0, 0, 1),
+											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
 		Collision c = STLModel.checkForCollision(triangle, location, direction, null);
@@ -24,7 +25,8 @@ public class STLModelTest {
 	public void testCheckForCollisionCenter() {
 		Vector3D direction = new Vector3D(0, 0, -1);
 		Vector3D location = new Vector3D(0.5, 0.75, 1);
-		Triangle triangle = new Triangle(null, new Vector3D(1, 1, 0),
+		Triangle triangle = new Triangle(new Vector3D(0, 0, 1),
+											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
 		Collision c = STLModel.checkForCollision(triangle, location, direction, null);
@@ -38,7 +40,8 @@ public class STLModelTest {
 	public void testCheckForNoCollision() {
 		Vector3D direction = new Vector3D(0, 0, -1);
 		Vector3D location = new Vector3D(0.5, 1.75, 1);
-		Triangle triangle = new Triangle(null, new Vector3D(1, 1, 0),
+		Triangle triangle = new Triangle(new Vector3D(0, 0, 1),
+											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
 		Collision c = STLModel.checkForCollision(triangle, location, direction, null);

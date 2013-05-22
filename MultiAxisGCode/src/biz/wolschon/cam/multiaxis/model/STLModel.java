@@ -330,7 +330,7 @@ public class STLModel implements IModel {
 			}
 		});
 //TODO: optimize to not test all triangles
-//TODO: paralellize this to multiple processors
+//TODO: parallelize this to multiple processors
 		for (Triangle triangle : this.triangles) {
 			Collision c = checkForCollision(triangle, aLocation, aDirection, aTool);
 			if (c != null) {
@@ -502,7 +502,8 @@ public class STLModel implements IModel {
 		double u = (dot11 * dot02 - dot01 * dot12) * invD;
 		double v = (dot00 * dot12 - dot01 * dot02) * invD;
 
-		if (u <= 0.0d || v <= 0.0d || u+v >= 1.0d) {
+		//if (u <= 0.0d || v <= 0.0d || u+v >= 1.0d) {
+		if (u < 0.0d || v < 0.0d || u+v > 1.0d) {
 			return null;
 		}
 		return new Collision(aTriangle, p, u, v);
