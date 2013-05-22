@@ -73,6 +73,9 @@ public class LinearStrategy implements IStrategy {
 	@Override
 	public void runStrategy(final double aStartLocation[]) throws IOException {
 		mMeanderTemp = !mMeanderTemp;
+		if (mDirection != Direction.Meander) {
+			// TODO: raise tool and move it to the start position without colliding with the object
+		}
 		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
 		double start = aStartLocation[mAxis.ordinal()];
 		double current = aStartLocation[mAxis.ordinal()];
@@ -93,7 +96,6 @@ public class LinearStrategy implements IStrategy {
 					}
 					break;
 			}
-			currentLocation[mAxis.ordinal()] = current;
 			getNextStrategy().runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length));
 			current += mStep;
 		}
