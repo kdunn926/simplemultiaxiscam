@@ -111,8 +111,8 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	 */
      protected void runStrategyHole(final double aStartLocation[]) throws IOException {
 		System.out.println("hole detected at X" + aStartLocation[0] + " Y" + aStartLocation[1] + " Z" + aStartLocation[2] + " A" + aStartLocation[3]);	
-//TODO: TEST		aStartLocation[Axis.Z.ordinal()] = mModel.getMinZ(); // cut all the way through
-		//TODO: TEST		getNextStrategy().runStrategy(aStartLocation);
+		aStartLocation[Axis.Z.ordinal()] = mModel.getMinZ(); // cut all the way through
+		getNextStrategy().runStrategy(aStartLocation);
 	}
 	/**
 	 * Apart from the entry and exit point on a path through the object, there is also a cavity inside.<br/>
