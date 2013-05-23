@@ -38,7 +38,7 @@ public enum Axis {
 
 		@Override
 		public Rotation getRotation(double degrees) {
-			Rotation rot = new Rotation(new Vector3D(1d,0d,0d), degrees);
+			Rotation rot = new Rotation(new Vector3D(1d,0d,0d), Math.toRadians(degrees));
 			return rot;
 		}
 	},
@@ -53,7 +53,7 @@ public enum Axis {
 
 		@Override
 		public Rotation getRotation(double degrees) {
-			Rotation rot = new Rotation(new Vector3D(0d,1d,0d), degrees);
+			Rotation rot = new Rotation(new Vector3D(0d,1d,0d), Math.toRadians(degrees));
 			return rot;
 		}
 	},
@@ -68,7 +68,7 @@ public enum Axis {
 
 		@Override
 		public Rotation getRotation(double degrees) {
-			Rotation rot = new Rotation(new Vector3D(0d,0d,1d), degrees);
+			Rotation rot = new Rotation(new Vector3D(0d,0d,1d), Math.toRadians(degrees));
 			return rot;
 		}
 	};
