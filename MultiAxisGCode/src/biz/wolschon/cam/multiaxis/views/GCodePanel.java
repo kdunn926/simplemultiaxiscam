@@ -138,6 +138,9 @@ public class GCodePanel extends JPanel implements IProgressListener {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				GCodeLine line = (GCodeLine) codeList.getSelectedValue();
+				if (line == null) {
+					return;
+				}
 				double[] toolLocation = line.getToolLocation();
 				if (toolLocation == null) {
 					return; // header
