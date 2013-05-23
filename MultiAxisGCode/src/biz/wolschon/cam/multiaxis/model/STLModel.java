@@ -306,7 +306,13 @@ public class STLModel implements IModel {
 	 */
 	@Override
 	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection) {
-		return getCollisions(aLocation, aDirection, null);
+		SortedSet<Collision> collisions = getCollisions(aLocation, aDirection, null);
+//		System.out.println("getCollisions location=" + aLocation + " direction=" + aDirection + " => "
+//				+ collisions.size() + " collisions");
+//		for (Collision collision : collisions) {
+//			System.out.println("collision: at " + collision.getCollisionPoint() + " with poylgon " + collision.getCollidingPolygon());
+//		}
+		return collisions;
 	}
 	/**
 	 * return the ID (index) or all triangles that are intersected by a ray
@@ -321,10 +327,10 @@ public class STLModel implements IModel {
 				double length1 = first.getCollisionPoint().subtract(aLocation).getNorm();
 				double length2 = second.getCollisionPoint().subtract(aLocation).getNorm();
 				if (length2 > length1) {
-					return 1;
+					return -1;
 				}
 				if (length2 < length1) {
-					return 2;
+					return 1;
 				}
 				return 0;
 			}
