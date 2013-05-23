@@ -29,6 +29,7 @@ public class GCodeWriterStrategy implements IStrategy {
 		decimalSymbol.setDecimalSeparator('.');
 		NUMBERFORMAT = new DecimalFormat("#.########", decimalSymbol);
 		NUMBERFORMAT.setGroupingUsed(false);
+		NUMBERFORMAT.setMinimumFractionDigits(1);//Workaround for a bug in NCPlot
 	}
 	
 	/**
