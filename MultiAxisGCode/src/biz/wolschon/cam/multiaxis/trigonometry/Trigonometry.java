@@ -146,16 +146,23 @@ public class Trigonometry {
 	 * @see inverseToolKinematic4Axis
 	 */
 	protected static void inverseKinematic2D(final double[] aMachinePosition, final Axis aRotationAxis, final Vector3D aTool) {
-			Axis[] plane = aRotationAxis.getRotationPlane();
-			double oldHeight =  aMachinePosition[plane[0].ordinal()];
-			double oldWidth  =  aMachinePosition[plane[1].ordinal()];
-			double angle = -1 * getRotationAngle(aTool, aRotationAxis);
+			//Axis[] plane = aRotationAxis.getRotationPlane();
+			//double oldHeight =  aMachinePosition[plane[0].ordinal()];
+			//double oldWidth  =  aMachinePosition[plane[1].ordinal()];
+			double angle =  Math.toDegrees(Vector3D.angle(aTool, new Vector3D(0, 0, 1)));  //-1 * getRotationAngle(aTool, aRotationAxis);
+	System.out.println("inverse kinematic: angle=" + angle + " machinepos(A)=" + aMachinePosition[Axis.A.ordinal()]);
 
-			double rotated[] = rotate2D(oldHeight, oldWidth, angle); //  - aMachinePosition[aRotationAxis.ordinal()]
+			Vector3D v = new Vector3D(aMachinePosition[0], aMachinePosition[1], aMachinePosition[2]);
+			v = aRotationAxis.getRotation(angle).applyTo(v);
+			aMachinePosition[0] = v.getX();
+			aMachinePosition[1] = v.getY();
+			aMachinePosition[2] = v.getZ();
+			aMachinePosition[aRotationAxis.ordinal()] = angle;
+/*			double rotated[] = rotate2D(oldHeight, oldWidth, angle); //  - aMachinePosition[aRotationAxis.ordinal()]
 
 			aMachinePosition[plane[0].ordinal()] = rotated[0]; 
 			aMachinePosition[plane[1].ordinal()] = rotated[1];
-			aMachinePosition[aRotationAxis.ordinal()] = angle;
+			aMachinePosition[aRotationAxis.ordinal()] = angle;*/
 			while (aMachinePosition[aRotationAxis.ordinal()] > 360) {
 				aMachinePosition[aRotationAxis.ordinal()] -= 360.0d;
 			}

@@ -1,7 +1,9 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
+import java.util.Arrays;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import biz.wolschon.cam.multiaxis.model.Collision;
@@ -50,22 +52,29 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 	 * @param aStartLocation the tool coordinates (X,Y,Z, possibly A, B and maybe even C rotational axis too) to reach #aCollision
 	 */
 	@Override
-	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision) throws IOException {
+	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision, final Rotation aRotA) throws IOException {
 		Triangle polygon = aCollision.getCollidingPolygon();
 		Vector3D normal	 = polygon.getNormal();
 		//System.out.println("DEBUG: FollowSurfaceNormalCutStrategy normal=" + normal.toString());
 		//Vector3D point   = aCollision.getCollisionPoint(); 
 
-		aStartLocation[Axis.X.ordinal()] = aCollision.getCollisionPoint().getX();
-		aStartLocation[Axis.Y.ordinal()] = aCollision.getCollisionPoint().getY();
-		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
-		aStartLocation[Axis.A.ordinal()] = 0;
+		Vector3D collisionPoint = aCollision.getCollisionPoint();
+		double childLocation[] = Arrays.copyOf(aStartLocation, aStartLocation.length);
+		childLocation[Axis.X.ordinal()] = collisionPoint.getX();
+		childLocation[Axis.Y.ordinal()] = collisionPoint.getY();
+		childLocation[Axis.Z.ordinal()] = collisionPoint.getZ();
+		if (childLocation.length > Axis.A.ordinal() && mRotationAxis == Axis.A) {
+			childLocation[Axis.A.ordinal()] = 0;
+		}
+		if (childLocation.length > Axis.B.ordinal() && mRotationAxis == Axis.B) {
+			childLocation[Axis.B.ordinal()] = 0;
+		}
 
 		//do inverse kinematic using the surface normal at aCollision point as the direction we are trying to make contact from
-		Trigonometry.inverseToolKinematic4Axis(aStartLocation, mRotationAxis, normal, getTool());
+		Trigonometry.inverseToolKinematic4Axis(childLocation, mRotationAxis, normal, getTool());
 		//TODO: check for collision again and use original aStartLocation if thes differ (= with the new angle for mRotationAxis some part of our tool collides with the part) 
 
-		getNextStrategy().runStrategy(aStartLocation);
+		getNextStrategy().runStrategy(childLocation);
 	}
 
 }
