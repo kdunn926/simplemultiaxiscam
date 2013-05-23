@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -87,18 +88,22 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 		Rotation rotA = Axis.A.getRotation(aStartLocation[Axis.A.ordinal()]);
 
 		direction = rotA.applyInverseTo(direction);
-		SortedSet<Collision> collisions = getModel().getCollisions(new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]), direction);//, mTool);
+//		System.out.println("calling getCollisions machine-location=" + Arrays.toString(aStartLocation));
+		
+		Vector3D colStartLocation = new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]);
+		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));//TODO: test
+		SortedSet<Collision> collisions = getModel().getCollisions(colStartLocation, direction);//, mTool);
 		if (collisions.size() == 0) {
 			runStrategyHole(aStartLocation);
 			return; // TODO: cut all the way through (hole)
 		}
 		if (collisions.size() > 2) {
 			// we detected a non-convex patch
-			runStrategyNonConvex(aStartLocation, collisions);
+			runStrategyNonConvex(aStartLocation, collisions, rotA);
 		}
 		//TODO: sort collisions by distance
 
-		runStrategyCollision(aStartLocation, collisions.first());
+		runStrategyCollision(aStartLocation, collisions.first(), rotA);
 	}
 	/**
 	 * No part of the object is below the cutter
@@ -106,28 +111,42 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	 */
      protected void runStrategyHole(final double aStartLocation[]) throws IOException {
 		System.out.println("hole detected at X" + aStartLocation[0] + " Y" + aStartLocation[1] + " Z" + aStartLocation[2] + " A" + aStartLocation[3]);	
-		aStartLocation[Axis.Z.ordinal()] = mModel.getMinZ(); // cut all the way through
-		getNextStrategy().runStrategy(aStartLocation);
+//TODO: TEST		aStartLocation[Axis.Z.ordinal()] = mModel.getMinZ(); // cut all the way through
+		//TODO: TEST		getNextStrategy().runStrategy(aStartLocation);
 	}
 	/**
 	 * Apart from the entry and exit point on a path through the object, there is also a cavity inside.<br/>
 	 * This may be a non-nonvex surface that can be milled if cutting from 2 or more directions.
+	 * @param aRotA 
 	 * @throws IOException 
 	 */
-	protected void runStrategyNonConvex(final double aStartLocation[], final SortedSet<Collision> aCollisionList) throws IOException {
+	protected void runStrategyNonConvex(final double aStartLocation[], final SortedSet<Collision> aCollisionList, Rotation aRotA) throws IOException {
 		//TODO: move Z to travel-height
 		//TODO use a linear(X)+linear(Y)+StraightZ combination  along the plane of the start+end of this noncave patch to handle it
 
 		// also cut the topmost collision like in a regular case
-		runStrategyCollision(aStartLocation, aCollisionList.first());
+		runStrategyCollision(aStartLocation, aCollisionList.first(), aRotA);
 	}
 	/**
 	 * The usual case of cutting a point on the (convex) surface.
 	 * @param aCollision The point of cutting.
 	 * @param aStartLocation the tool coordinates (X,Y,Z, possibly A, B and maybe even C rotational axis too) to reach #aCollision
+	 * @param aRotA 
 	 */
-	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision) throws IOException {
-		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
+	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision, final Rotation aRotA) throws IOException {
+		// our collision point refers to a rotated tool. Since actually the part rotates, we need to rotate it back before determining the Z cutting depth
+		Vector3D rotatedPoint = aRotA.applyTo(aCollision.getCollisionPoint());
+	System.out.println("machine location: " + Arrays.toString(aStartLocation));
+	System.out.println("original collision point: " + aCollision.getCollisionPoint().toString());
+	System.out.println("rotated  collision point: " + rotatedPoint.toString());
+		aStartLocation[Axis.Z.ordinal()] = rotatedPoint.getZ();
+		
+		//TEST
+//		aStartLocation[Axis.X.ordinal()] = aCollision.getCollisionPoint().getX();
+//		aStartLocation[Axis.Y.ordinal()] = aCollision.getCollisionPoint().getY();
+//		aStartLocation[Axis.Z.ordinal()] = aCollision.getCollisionPoint().getZ();
+//		aStartLocation[Axis.A.ordinal()] = 0;
+		
 		getNextStrategy().runStrategy(aStartLocation);
 	}
 
