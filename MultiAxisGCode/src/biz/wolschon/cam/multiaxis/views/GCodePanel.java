@@ -221,7 +221,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 				double[] startLocation = new double[] {
 						mModel.getCenterX(),
 						mModel.getCenterY(),
-						mModel.getMaxZ() + 1,
+						mModel.getCenterZ(),
 						0 // A axis
 						// no B axis
 				};
