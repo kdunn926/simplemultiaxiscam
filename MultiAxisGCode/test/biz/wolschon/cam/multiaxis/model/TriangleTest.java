@@ -3,7 +3,7 @@
  */
 package biz.wolschon.cam.multiaxis.model;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
 
 import org.junit.Test;
 
