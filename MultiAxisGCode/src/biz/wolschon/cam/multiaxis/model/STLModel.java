@@ -318,6 +318,7 @@ public class STLModel implements IModel {
 	 * return the ID (index) or all triangles that are intersected by a ray
 	 * starting in location and racing of into direction.
 	 */
+	@Override
 	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection, final Tool aTool) {
 	
 		SortedSet<Collision> result = new TreeSet<Collision>(new Comparator<Collision>() {
@@ -400,6 +401,9 @@ public class STLModel implements IModel {
 						hitPoint = hitPoint_;
 						hitPointOffset = hitPointOffset_;
 					}
+				} else {
+					hitPoint = hitPoint_;
+					hitPointOffset = hitPointOffset_;
 				}
 
 			}

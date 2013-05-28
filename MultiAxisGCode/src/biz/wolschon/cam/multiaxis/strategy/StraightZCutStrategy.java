@@ -98,8 +98,8 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 //		System.out.println("calling getCollisions machine-location=" + Arrays.toString(aStartLocation));
 		
 		Vector3D colStartLocation = new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]);
-		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));//TODO: test
-		SortedSet<Collision> collisions = getModel().getCollisions(colStartLocation, direction);//, mTool);
+		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));
+		SortedSet<Collision> collisions = getModel().getCollisions(colStartLocation, direction, mTool);
 		if (collisions.size() == 0) {
 			runStrategyHole(aStartLocation ,isCutting);
 			return; // TODO: cut all the way through (hole)
