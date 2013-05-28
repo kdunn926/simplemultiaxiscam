@@ -1,13 +1,12 @@
 /**
  * 
  */
-package biz.wolschon.cam.multiaxis.ui;
+package biz.wolschon.cam.multiaxis.views;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 
 import biz.wolschon.cam.multiaxis.model.IModel;

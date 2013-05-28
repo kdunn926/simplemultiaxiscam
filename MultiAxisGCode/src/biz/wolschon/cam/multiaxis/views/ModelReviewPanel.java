@@ -7,9 +7,14 @@ import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
 import java.awt.GridLayout;
+import java.io.Serializable;
 
 public class ModelReviewPanel extends JPanel {
 
+	/**
+	 * For {@link Serializable}.
+	 */
+	private static final long serialVersionUID = -2144909213978050312L;
 	private ParallelProjectionView panelXZ;
 	private ParallelProjectionView panelYZ;
 	private ParallelProjectionView panelXY;
@@ -20,14 +25,14 @@ public class ModelReviewPanel extends JPanel {
 	public ModelReviewPanel(final IModel model) {
 		setLayout(new GridLayout(2, 2));
 		
-		panelXZ = new ParallelProjectionView(model, null);
+		panelXZ = new ParallelProjectionView(model, null, "front");
 		add(panelXZ);
 		
-		panelYZ = new ParallelProjectionView(model, null);
+		panelYZ = new ParallelProjectionView(model, null, "right");
 		panelYZ.setHorizontalAxis(Axis.Y);
 		add(panelYZ);
 
-		panelXY = new ParallelProjectionView(model, null);
+		panelXY = new ParallelProjectionView(model, null, "top");
 		panelXY.setVerticalAxis(Axis.X);
 		panelXY.setHorizontalAxis(Axis.Y);
 		add(panelXY);

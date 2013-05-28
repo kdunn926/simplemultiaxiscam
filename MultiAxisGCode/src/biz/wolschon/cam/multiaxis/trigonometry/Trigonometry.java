@@ -122,7 +122,7 @@ public class Trigonometry {
 		IToolShape tip = aTool.getTipShape();
 		//TODO: limit the rotation angle, so no part of the shaft of the tool collides with the part
 		if (tip instanceof BallShape) {
-			BallShape ball = (BallShape) tip;
+			//BallShape ball = (BallShape) tip;
 			// we rotate the center of the ball, then subtract the radius to get the rotated tip of the ball-tip
 			//machinePosition[Axis.Z.ordinal()] -= ball.getRadius();
 			inverseKinematic2D(aMachinePosition, aRotationAxis, aToolVector);//, aTool);

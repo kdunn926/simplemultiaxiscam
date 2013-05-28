@@ -10,6 +10,7 @@ import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 import biz.wolschon.cam.multiaxis.trigonometry.Trigonometry;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -61,6 +62,7 @@ public class ParallelProjectionView extends JPanel {
 	private double scale;
 	private int horizontalOffset;
 	private int verticalOffset;
+	private String mLabel;
 	/**
 	 * Used for double buffering.
 	 */
@@ -68,12 +70,16 @@ public class ParallelProjectionView extends JPanel {
 
 	/**
 	 * @param aTool may be null
+	 * @param aLabel 
 	 */
-	public ParallelProjectionView(final IModel aModel, final Tool aTool) {
+	public ParallelProjectionView(final IModel aModel, final Tool aTool, final String aLabel) {
 		this.mModel = aModel;
 		this.mTool  = aTool;
+		this.mLabel = aLabel;
 		setVerticalAxis(Axis.Z);
 		setHorizontalAxis(Axis.X);
+		setMinimumSize(new Dimension(100, 100));
+		setPreferredSize(new Dimension(500, 500));
 	}
 
 	public void setToolLocation(final double[] aToolLocation) {
@@ -200,6 +206,10 @@ public class ParallelProjectionView extends JPanel {
 		g.drawLine(5,  20,  25,  20);
 		g.drawLine(25,  20,  23,  23);
 		g.drawLine(25,  20,  23,  18);
+
+		if (mLabel != null && mLabel.length() > 0) {
+			g.drawChars(mLabel.toCharArray(), 0, mLabel.length(), 40, 15);
+		}
 		
 		g.setColor(Color.RED);
 		Vector3D leftA = new Vector3D(mModel.getMinX(), mModel.getCenterY(), mModel.getCenterZ());

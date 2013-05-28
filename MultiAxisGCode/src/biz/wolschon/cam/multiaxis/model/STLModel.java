@@ -450,6 +450,7 @@ public class STLModel implements IModel {
 		return isInside2(p, aTriangle);
 	}
 
+	@SuppressWarnings("unused")
 	private static Collision isInside0(final Vector3D p, final Triangle aTriangle) {
 		// Compute vectors        
 		Vector3D v0 = aTriangle.getP3().subtract(aTriangle.getP1());
@@ -476,6 +477,7 @@ public class STLModel implements IModel {
 		return new Collision(aTriangle, p, u, v);
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean isInside1(final Vector3D p, final Triangle aTriangle) {
 		if (!sameSide(p, aTriangle.getP1(), aTriangle.getP2(), aTriangle.getP3())) {
 			return false;

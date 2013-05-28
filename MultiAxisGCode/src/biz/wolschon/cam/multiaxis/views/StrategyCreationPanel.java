@@ -2,6 +2,7 @@ package biz.wolschon.cam.multiaxis.views;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.io.Serializable;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -77,10 +78,17 @@ public class StrategyCreationPanel extends JPanel {
 	 * Abstract interface for a selectable strategy and it's UI.
 	 */
 	private static abstract class StrategySelection extends JPanel {
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -189963420158277708L;
 		private String mLabel;
 		public StrategySelection(final String aLabel) {
 			this.mLabel = aLabel;
 		}
+		/**
+		 * @see returns the label.
+		 */
 		@Override
 		public String toString() {
 			return mLabel;
@@ -99,7 +107,10 @@ public class StrategyCreationPanel extends JPanel {
 	 * A parallel strategy moving along 2 axis.
 	 */
 	private final StrategySelection PARALLEL = new StrategySelection("Parallel") {
-		private JTextField diameter = new JTextField("1.0");
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -7480187587759638513L;
 		private JList firstAxis 	= new JList(Axis.values());
 		private JTextField firstAxisStep = new JTextField("0.33");
 		private JList secondAxis = new JList(Axis.values());
@@ -153,7 +164,10 @@ public class StrategyCreationPanel extends JPanel {
 	 * A crosswise strategy moving along the same 2 axis twice in different order.
 	 */
 	private final StrategySelection CROSSWISE = new StrategySelection("Crosswise") {
-		private JTextField diameter = new JTextField("1.0");
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -2045718365086921240L;
 		private JList firstAxis 	= new JList(Axis.values());
 		private JTextField firstAxisStep = new JTextField("0.33");
 		private JList secondAxis = new JList(Axis.values());
@@ -208,10 +222,17 @@ public class StrategyCreationPanel extends JPanel {
 	 * Abstract interface for a selectable tool and it's UI.
 	 */
 	private static abstract class ToolSelection extends JPanel {
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -4892718902569153906L;
 		private String mLabel;
 		public ToolSelection(final String aLabel) {
 			this.mLabel = aLabel;
 		}
+		/**
+		 * @see returns the label.
+		 */
 		@Override
 		public String toString() {
 			return mLabel;
@@ -229,6 +250,10 @@ public class StrategyCreationPanel extends JPanel {
 	 * Our default tool (a ball shaped cutter).
 	 */
 	private final ToolSelection TOOL0 = new ToolSelection("Ball Nose") {
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = 2957137275776885590L;
 		private JTextField diameter = new JTextField("1.0");
 		private JTextField length 	= new JTextField("10.0");
 		private JTextField shaftDiameter = new JTextField("0.5");
@@ -264,6 +289,10 @@ public class StrategyCreationPanel extends JPanel {
 	 * A flat cutter tool.
 	 */
 	private final ToolSelection TOOL1 = new ToolSelection("Flat Cutter") {
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -7515866218730158209L;
 		private JTextField diameter = new JTextField("1.0");
 		private JTextField length = new JTextField("10.0");
 		private JTextField cutterLength = new JTextField("5.0");

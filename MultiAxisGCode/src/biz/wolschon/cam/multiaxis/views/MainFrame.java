@@ -13,7 +13,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
-import biz.wolschon.cam.multiaxis.ui.Wizard1Loader;
 import biz.wolschon.cam.multiaxis.views.StrategyStepsPanel.CurrentStrategyStepListener;
 
 import javax.swing.border.TitledBorder;
@@ -32,7 +31,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 	 */
 	public static void main(String[] args) {
 		try {
-			Wizard1Loader step1 = new Wizard1Loader(new Wizard1Loader.Listener() {
+			/*Wizard1Loader step1 = */new Wizard1Loader(new Wizard1Loader.Listener() {
 				
 				@Override
 				public void onFileLoaded(final IModel aModel) throws IOException {
