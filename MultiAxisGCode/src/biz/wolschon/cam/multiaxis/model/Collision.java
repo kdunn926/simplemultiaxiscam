@@ -15,6 +15,7 @@ public class Collision {
 	private double u;
 	@SuppressWarnings("unused")
 	private double v;
+	private double toolLocation;
 	/**
 	 * 
 	 * @param triangle the triangle to collide with
@@ -22,10 +23,11 @@ public class Collision {
 	 * @param u collision point as given by the fist vector of the triangle
 	 * @param v collision point as given by the second vector of the triangle
 	 */
-	protected Collision(final Triangle triangle, final Vector3D p, final double u, final double v) {
+	protected Collision(final Triangle triangle, final Vector3D p, final double u, final double v, final double toolLocation) {
 		if (p.isInfinite() || p.isNaN()) {
 			throw new IllegalArgumentException("One coordinate of the collision point is NaN or Infinity");
 		}
+		this.toolLocation = toolLocation;
 		this.triangle = triangle;
 		this.collisionPoint = p;
 		this.u = u;
@@ -36,5 +38,16 @@ public class Collision {
 	}
 	public Triangle getCollidingPolygon() {
 		return triangle;
+	}
+	/**
+	 * 
+	 * @return offset of the tool-segment that collides with the tool-tip
+	 */
+	public double getToolLocation() {
+		return toolLocation;
+	}
+	@Override
+	public String toString() {
+		return "[colliding with " + triangle + " at " + getCollisionPoint() + " using " + toolLocation + "]";
 	}
 }

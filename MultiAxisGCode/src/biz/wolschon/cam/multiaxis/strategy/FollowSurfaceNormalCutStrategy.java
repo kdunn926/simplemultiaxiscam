@@ -2,6 +2,7 @@ package biz.wolschon.cam.multiaxis.strategy;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.SortedSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -73,13 +74,43 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 
 		//do inverse kinematic using the surface normal at aCollision point as the direction we are trying to make contact from
 		Trigonometry.inverseToolKinematic4Axis(childLocation, mRotationAxis, normal, getTool());
+
 		//TODO: check for collision again and use original aStartLocation if thes differ (= with the new angle for mRotationAxis some part of our tool collides with the part) 
+		Rotation rotA = Axis.A.getRotation(childLocation[Axis.A.ordinal()]);
+		SortedSet<Collision> newCollisions = diveForCollisions(aStartLocation, rotA);
+		if (newCollisions.size() == 0) {
+			System.err.println("After inverse kinematics, we no longer collide with the part.");
+			super.runStrategyCollision(aStartLocation, aCollision, aRotA, isCutting);
+			return;
+		}
+		Collision topmost = newCollisions.first();
+		if (!isSameCollision(topmost, aCollision)) {
+			System.err.println("After inverse kinematics, we no longer collide with the part in the same spot. regular=" + aCollision + " now=" + topmost);
+			super.runStrategyCollision(aStartLocation, aCollision, aRotA, isCutting);
+			return;
+		}
 
 		if (!isCutting) {
 			// we still run inverseToolKinematic4Axis to end up with the same location on all other axis
 			childLocation[Axis.Z.ordinal()] = getFreeMovementHeight();
 		}
 		getNextStrategy().runStrategy(childLocation, isCutting);
+	}
+
+	private boolean isSameCollision(Collision aTopmost, Collision aCollision) {
+		//TODO: happens when it should not happen if (aTopmost.getCollidingPolygon() != aCollision.getCollidingPolygon()) {
+		//	System.err.println("colliding with another polygon");
+		//	return false;
+		//}
+		double diff = Math.abs(aTopmost.getToolLocation() - aCollision.getToolLocation());
+		
+		if (diff > 0.001) {
+			System.err.println("colliding using another part of the tool");
+			return false;
+		}
+		
+		// TODO compare coordinates using an epsilon
+		return true;
 	}
 
 }

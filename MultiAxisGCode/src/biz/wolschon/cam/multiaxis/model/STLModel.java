@@ -365,6 +365,7 @@ public class STLModel implements IModel {
 
 		Vector3D pNormal = aTriangle.getNormal();
 		Vector3D hitPointOffset = null;
+		double hitPointToolLocation = 0;
 		double hitPoint = -1;
 		if (aTool != null) {
 			// ceck for collisions with any part of the tool
@@ -400,10 +401,12 @@ public class STLModel implements IModel {
 					if (hitPoint_ > hitPoint) {
 						hitPoint = hitPoint_;
 						hitPointOffset = hitPointOffset_;
+						hitPointToolLocation =  shape.getLocation();
 					}
 				} else {
 					hitPoint = hitPoint_;
 					hitPointOffset = hitPointOffset_;
+					hitPointToolLocation =  shape.getLocation();
 				}
 
 			}
@@ -451,11 +454,11 @@ public class STLModel implements IModel {
 		}
 		return null;*/
 
-		return isInside2(p, aTriangle);
+		return isInside2(p, aTriangle, hitPointToolLocation);
 	}
 
 	@SuppressWarnings("unused")
-	private static Collision isInside0(final Vector3D p, final Triangle aTriangle) {
+	private static Collision isInside0(final Vector3D p, final Triangle aTriangle, final double hitPointToolLocation) {
 		// Compute vectors        
 		Vector3D v0 = aTriangle.getP3().subtract(aTriangle.getP1());
 		Vector3D v1 = aTriangle.getP2().subtract(aTriangle.getP1());
@@ -478,7 +481,7 @@ public class STLModel implements IModel {
 		if (!inTriangle) {
 			return null;
 		}
-		return new Collision(aTriangle, p, u, v);
+		return new Collision(aTriangle, p, u, v, hitPointToolLocation);
 	}
 
 	@SuppressWarnings("unused")
@@ -495,7 +498,7 @@ public class STLModel implements IModel {
 		
 		return true;
 	}
-	private static Collision isInside2(final Vector3D p, final Triangle aTriangle) {
+	private static Collision isInside2(final Vector3D p, final Triangle aTriangle, final double hitPointToolLocation) {
 		//TODO: optimize this to reduce object creation
 		//TODO: remove u and v as output and change everything in here to float (good enough for a hit-test)
 		Vector3D v0 = aTriangle.getP3().subtract(aTriangle.getP1());
@@ -518,7 +521,7 @@ public class STLModel implements IModel {
 		if (u < 0.0d || v < 0.0d || u+v > 1.0d) {
 			return null;
 		}
-		return new Collision(aTriangle, p, u, v);
+		return new Collision(aTriangle, p, u, v, hitPointToolLocation);
 
 	}
 	/*

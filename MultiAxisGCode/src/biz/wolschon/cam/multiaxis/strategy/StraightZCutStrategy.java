@@ -85,21 +85,8 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	 */
 	@Override
 	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
-		//TODO: support more then just locations in Y+A
-
-		// getCollisions uses a 3D location and direction whereas startLocation
-		// is a 4 dimensional machine coordinate including 2 rotational axis
-
-		// direction our cutter is coming from (calculated using A axis)
-		Vector3D direction = new Vector3D(0d,0d,-1d);
 		Rotation rotA = Axis.A.getRotation(aStartLocation[Axis.A.ordinal()]);
-
-		direction = rotA.applyInverseTo(direction);
-//		System.out.println("calling getCollisions machine-location=" + Arrays.toString(aStartLocation));
-		
-		Vector3D colStartLocation = new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]);
-		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));
-		SortedSet<Collision> collisions = getModel().getCollisions(colStartLocation, direction, mTool);
+		SortedSet<Collision> collisions = diveForCollisions(aStartLocation, rotA);
 		if (collisions.size() == 0) {
 			runStrategyHole(aStartLocation ,isCutting);
 			return; // TODO: cut all the way through (hole)
@@ -111,6 +98,33 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 		//TODO: sort collisions by distance
 
 		runStrategyCollision(aStartLocation, collisions.first(), rotA, isCutting);
+	}
+
+	/**
+	 * @param aStartLocation
+	 * @return
+	 */
+	protected SortedSet<Collision> diveForCollisions(
+			final double[] aStartLocation, final Rotation rotA) {
+		SortedSet<Collision> collisions;
+		{
+		//TODO: support more then just locations in Y+A
+
+		// getCollisions uses a 3D location and direction whereas startLocation
+		// is a 4 dimensional machine coordinate including 2 rotational axis
+
+		// direction our cutter is coming from (calculated using A axis)
+		Vector3D direction = new Vector3D(0d,0d,-1d);
+		
+
+		direction = rotA.applyInverseTo(direction);
+//		System.out.println("calling getCollisions machine-location=" + Arrays.toString(aStartLocation));
+		
+		Vector3D colStartLocation = new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]);
+		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));
+		collisions = getModel().getCollisions(colStartLocation, direction, mTool);
+		}
+		return collisions;
 	}
 	/**
 	 * No part of the object is below the cutter

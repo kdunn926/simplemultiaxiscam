@@ -34,4 +34,8 @@ public class Triangle {
 	public Vector3D getP3() {
 		return p3;
 	}
+	@Override
+	public String toString() {
+		return "#" + hashCode();
+	}
 }
