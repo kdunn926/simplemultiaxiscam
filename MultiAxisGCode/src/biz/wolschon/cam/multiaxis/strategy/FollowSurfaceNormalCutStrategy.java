@@ -34,9 +34,10 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 	 * @param aModel The part we are trying to mill. (to detemine the Z depth to cut)
 	 * @param aRotationAxis the rotation axis(value determined by a previous strategy) we are using
 	 * @param aNext The next strategy to call
+	 * @param aFreeMovementHeight z-position that never collides with any part of the object.
 	 */
-	public FollowSurfaceNormalCutStrategy(IModel aModel, final Axis aRotationAxis, final IStrategy aNext, final Tool aTool) {
-		super(aModel, aNext, aTool);
+	public FollowSurfaceNormalCutStrategy(IModel aModel, final Axis aRotationAxis, final IStrategy aNext, final Tool aTool, final double aFreeMovementHeight) {
+		super(aModel, aNext, aTool, aFreeMovementHeight);
 		if (aRotationAxis.isLinearAxis()) {
 			throw new IllegalArgumentException("no a rotation axis");
 		}
@@ -52,7 +53,7 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 	 * @param aStartLocation the tool coordinates (X,Y,Z, possibly A, B and maybe even C rotational axis too) to reach #aCollision
 	 */
 	@Override
-	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision, final Rotation aRotA) throws IOException {
+	protected void runStrategyCollision(final double aStartLocation[], final Collision aCollision, final Rotation aRotA, final boolean isCutting) throws IOException {
 		Triangle polygon = aCollision.getCollidingPolygon();
 		Vector3D normal	 = polygon.getNormal();
 		//System.out.println("DEBUG: FollowSurfaceNormalCutStrategy normal=" + normal.toString());
@@ -74,7 +75,11 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 		Trigonometry.inverseToolKinematic4Axis(childLocation, mRotationAxis, normal, getTool());
 		//TODO: check for collision again and use original aStartLocation if thes differ (= with the new angle for mRotationAxis some part of our tool collides with the part) 
 
-		getNextStrategy().runStrategy(childLocation);
+		if (!isCutting) {
+			// we still run inverseToolKinematic4Axis to end up with the same location on all other axis
+			childLocation[Axis.Z.ordinal()] = getFreeMovementHeight();
+		}
+		getNextStrategy().runStrategy(childLocation, isCutting);
 	}
 
 }

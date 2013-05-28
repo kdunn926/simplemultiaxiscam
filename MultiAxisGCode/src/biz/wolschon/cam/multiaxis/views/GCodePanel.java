@@ -231,7 +231,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 							// no B axis
 					};
 					strategy.addProgressListener(GCodePanel.this);
-					strategy.runStrategy(startLocation);
+					strategy.runStrategy(startLocation, true);
 					strategy.endStrategy();
 
 				}

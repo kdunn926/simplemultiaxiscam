@@ -91,14 +91,14 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		
 		mLeftPane = new JPanel();
 		mLeftPane.setLayout(new BorderLayout());
-		mLeftPane.add(new JScrollPane(getStrategyStepsList()),  BorderLayout.NORTH);
+		mLeftPane.add(new JScrollPane(getStrategyStepsList(aModel)),  BorderLayout.NORTH);
 		contentPane.add(mLeftPane, JSplitPane.LEFT);
 
 		mReviewTab = new ModelReviewPanel(aModel);
 		mReviewTab.setPreferredSize(new Dimension(800, 600));
 		contentPane2.add(mReviewTab, JSplitPane.TOP);
 
-		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools));
+		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools, aModel));
 		mStrategySteps.addStrategyStep(mCurrentStrategyTab);
 
 		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategySteps);
@@ -109,9 +109,9 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		contentPane.setDividerLocation(0.3);
 	}
 
-	private JComponent getStrategyStepsList() {
+	private JComponent getStrategyStepsList(final IModel aModel) {
 		if (mStrategySteps == null) {
-			mStrategySteps = new StrategyStepsPanel(mTools);
+			mStrategySteps = new StrategyStepsPanel(mTools, aModel);
 			mStrategySteps.setListener(this);
 		}
     	return mStrategySteps;

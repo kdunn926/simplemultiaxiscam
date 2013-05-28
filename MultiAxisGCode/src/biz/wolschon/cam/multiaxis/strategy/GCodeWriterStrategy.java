@@ -48,9 +48,18 @@ public class GCodeWriterStrategy implements IStrategy {
 	 * @param aNextToolLocation the (3-6 dimensional) location we are trying to move to.
 	 */
 	@Override
-	public void runStrategy(final double[] aNextToolLocation) throws IOException {
+	public void runStrategy(final double[] aNextToolLocation, final boolean isCutting) throws IOException {
 		StringBuilder sb = new StringBuilder();
 
+		if (!isCutting) {
+			// if repositioning, first raise Z
+			sb.append("G1 Z").append(formatCoordinate(aNextToolLocation[2]));
+			sb.append(" F100\n"); //TODO: get speeds from strategies
+			writeCodeLine(sb.toString(), aNextToolLocation);
+
+			System.err.print(sb.toString()); //TODO: debug output
+			sb = new StringBuilder();
+		}
 		sb.append("G1 X").append(formatCoordinate(aNextToolLocation[0]));
 		sb.append(" Y").append(formatCoordinate(aNextToolLocation[1]));
 		sb.append(" Z").append(formatCoordinate(aNextToolLocation[2]));

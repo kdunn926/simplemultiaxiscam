@@ -49,11 +49,16 @@ public class ChainStrategy implements IStrategy, IProgressListener {
 		return mNextStrategy1;
 	}
 
+	/**
+	 * Called by the parent strategy. Usually in a loop.
+	 * @param startLocation some axis are already filled by the parent strategy.
+	 * @param isCutting true if cutting, false if repositioning (z=free movement height)
+	 */
 	@Override
-	public void runStrategy(final double aStartLocation[]) throws IOException {
+	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
 		double aStartLocation2[] = Arrays.copyOf(aStartLocation, aStartLocation.length);
-		getNextStrategy0().runStrategy(aStartLocation);
-		getNextStrategy1().runStrategy(aStartLocation2);
+		getNextStrategy0().runStrategy(aStartLocation, isCutting);
+		getNextStrategy1().runStrategy(aStartLocation2, isCutting);
 	}
 
 	/**

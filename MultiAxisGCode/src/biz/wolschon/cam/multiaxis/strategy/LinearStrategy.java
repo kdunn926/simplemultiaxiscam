@@ -74,10 +74,17 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	}
 
 	@Override
-	public void runStrategy(final double aStartLocation[]) throws IOException {
+	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
 		mMeanderTemp = !mMeanderTemp;
 		if (mDirection != Direction.Meander) {
-			// TODO: raise tool and move it to the start position without colliding with the object
+			// raise tool and move it to the start position without colliding with the object
+			double[] moveTo = Arrays.copyOf(aStartLocation, aStartLocation.length);
+			if (mDirection == Direction.Conventional) {
+				moveTo[mAxis.ordinal()] = mModel.getMin(mAxis);
+			} else {
+				moveTo[mAxis.ordinal()] = mModel.getMax(mAxis);
+			}
+			getNextStrategy().runStrategy(moveTo, false);
 		}
 		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
 		double start = mModel.getMin(mAxis);
@@ -101,7 +108,7 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 					}
 					break;
 			}
-			getNextStrategy().runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length));
+			getNextStrategy().runStrategy(Arrays.copyOf(currentLocation, aStartLocation.length), isCutting);
 			current += mStep;
 			this.mProgress++;
 		}

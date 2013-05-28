@@ -14,8 +14,9 @@ public interface IStrategy {
 	/**
 	 * Called by the parent strategy. Usually in a loop.
 	 * @param startLocation some axis are already filled by the parent strategy.
+	 * @param isCutting true if cutting, false if repositioning (z=free movement height)
 	 */
-	void runStrategy(double startLocation[]) throws IOException;
+	void runStrategy(double startLocation[], boolean isCutting) throws IOException;
 
 	/**
 	 * Call this after the last call to #runStrategy(double[]) to clean up and finalize.

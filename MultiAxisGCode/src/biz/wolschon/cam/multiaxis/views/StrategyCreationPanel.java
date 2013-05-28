@@ -13,9 +13,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -52,6 +54,7 @@ public class StrategyCreationPanel extends JPanel {
 	 * Checkbox to add a strategy to follow the surface normal on the B axis to the chain of command.
 	 */
 	private JCheckBox mReal5Axis;
+	private JSpinner freeMovementHeight = new JSpinner();
 	/**
 	 * List to select a tool from.<br/>
 	 * Uppon selecting the tool #onToolSelected() takes care of displaying the UI for it's parameters
@@ -66,6 +69,7 @@ public class StrategyCreationPanel extends JPanel {
 	 * Currently selected tool.
 	 */
 	private Tool mTool;
+	private IModel mModel;
 	/**
 	 * Currently selected strategy and also the JPanel for entering it's parameters.
 	 */
@@ -202,6 +206,8 @@ public class StrategyCreationPanel extends JPanel {
 
 			panel.add(new JLabel("cutting direction"), null);
 			panel.add(new JScrollPane(cuttingDirection));
+			 
+			panel.add(freeMovementHeight);
 
 			firstAxis.setSelectedValue(Axis.X, true);
 			secondAxis.setSelectedValue(Axis.A, true);
@@ -229,12 +235,13 @@ public class StrategyCreationPanel extends JPanel {
 	 * Create the panel.
 	 */
 	private ToolRepository mToolRepository;
-	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository) {
+	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository, final IModel aModel) {
 		this.mLabel = aLabel;
+		this.mModel = aModel;
 		this.mToolRepository = aToolRepository;
 		setLayout(new BorderLayout());
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(7, 1));
+		mainPanel.setLayout(new GridLayout(8, 1));
 		add(mainPanel, BorderLayout.CENTER);
 		
 		mParameterSettings = new JTabbedPane(JTabbedPane.TOP);
@@ -324,6 +331,15 @@ public class StrategyCreationPanel extends JPanel {
 		mReal5Axis.setEnabled(false);
 		mainPanel.add(mReal5Axis, null);
 		
+
+		SpinnerNumberModel snmodel = new SpinnerNumberModel(mModel.getMaxZ() + 5, mModel.getMinZ() - 100, mModel.getMaxZ() + 100, 1); 
+		freeMovementHeight.setModel(snmodel);
+		JPanel temp = new JPanel(new BorderLayout());
+		temp.add(new JLabel("free movement heigth"), BorderLayout.EAST);
+		temp.add(freeMovementHeight, BorderLayout.WEST);
+		mainPanel.add(temp, null);
+
+		
 	}
 
 	/**
@@ -348,16 +364,17 @@ public class StrategyCreationPanel extends JPanel {
 	 */
 	public IStrategy getStrategy(final GCodeWriterStrategy anOutputStrategy, final IModel aModel) {
 		IStrategy cutStrategy = anOutputStrategy;
+		double freeMovementHeightValue = ((SpinnerNumberModel)freeMovementHeight.getModel()).getNumber().doubleValue();
 		if (mReal5Axis.isSelected()) {
 			// 4. do real 5 axis cutting into real 4 axis cutting
-			cutStrategy = new FollowSurfaceNormalCutStrategy(aModel, Axis.B, cutStrategy, getTool());
+			cutStrategy = new FollowSurfaceNormalCutStrategy(aModel, Axis.B, cutStrategy, getTool(), freeMovementHeightValue);
 		}
 		if (mReal4Axis.isSelected()) {
 			// 3. do real 4 axis cutting into real 4 axis cutting
-			cutStrategy = new FollowSurfaceNormalCutStrategy(aModel, Axis.A, cutStrategy, getTool());
+			cutStrategy = new FollowSurfaceNormalCutStrategy(aModel, Axis.A, cutStrategy, getTool(), freeMovementHeightValue);
 		} else {
 			// 3. do fake 4 axis cutting by cutting only straight down
-			cutStrategy = new StraightZCutStrategy(aModel, cutStrategy, getTool());
+			cutStrategy = new StraightZCutStrategy(aModel, cutStrategy, getTool(), freeMovementHeightValue);
 		}
 
 		// 1. and 2. move along first and second axis
