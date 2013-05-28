@@ -64,6 +64,7 @@ public class StrategyCreationPanel extends JPanel {
 	 */
 	private StrategySelection mStrategyPanel;
 
+	private String mLabel;
 	/**
 	 * Abstract interface for a selectable strategy and it's UI.
 	 */
@@ -130,7 +131,7 @@ public class StrategyCreationPanel extends JPanel {
 		}
 		public IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy) {
 			
-			// 2. every step of 1., do around the A axis in 10° steps
+			// 2. every step of 1., do around the A axis in 10ï¿½ steps
 			LinearStrategy aroundAAxis = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
 			aroundAAxis.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
@@ -294,7 +295,8 @@ public class StrategyCreationPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public StrategyCreationPanel () {
+	public StrategyCreationPanel (final String aLabel) {
+		this.mLabel = aLabel;
 		setLayout(new BorderLayout());
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(7, 1));
@@ -404,4 +406,8 @@ public class StrategyCreationPanel extends JPanel {
 		return mStrategyPanel.getStrategy(aModel, cutStrategy );
 	}
 
+	@Override
+	public String toString() {
+		return mLabel;
+	}
 }

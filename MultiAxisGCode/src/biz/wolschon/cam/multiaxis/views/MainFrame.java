@@ -1,20 +1,27 @@
 package biz.wolschon.cam.multiaxis.views;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.io.IOException;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.JSplitPane;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.ui.Wizard1Loader;
+import javax.swing.border.TitledBorder;
 
 public class MainFrame extends JFrame {
 
-	private JPanel contentPane;
+	private JSplitPane contentPane;
+	private JPanel mLeftPane;
 
 	/**
 	 * Launch the application.
@@ -47,32 +54,84 @@ public class MainFrame extends JFrame {
 		}
 		
 	}
-
+    /**
+	 * Showing the model and tool position for
+	 * the currently selected line of G-Code
+	 */
 	private ModelReviewPanel mReviewTab;
-	private StrategyCreationPanel mStrategyTab;
+	/**
+	 * Currently selected strategy step
+	 * e.g. roughing, finishing or contour.
+	 */
+	private StrategyCreationPanel mCurrentStrategyTab;
+	/**
+	 * Showing the generated G-Code,
+	 * buttons to start code generation,
+	 * progress bar and save button for code.
+	 */
 	private GCodePanel mGCodeTab;
+	private JList mStrategySteps; //TODO: roughing,finishing,contour
+	private DefaultListModel mStrategyStepsModel;
 	/**
 	 * Create the frame.
 	 */
 	public MainFrame(final IModel aModel) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		setContentPane(contentPane);
+
+		JSplitPane contentPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		contentPane.add(contentPane2, JSplitPane.RIGHT);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		contentPane.add(tabbedPane, BorderLayout.CENTER);
+		mLeftPane = new JPanel();
+		mLeftPane.setLayout(new BorderLayout());
+		mLeftPane.add(new JScrollPane(getStrategyStepsList()),  BorderLayout.NORTH);
+		contentPane.add(mLeftPane, JSplitPane.LEFT);
 
 		mReviewTab = new ModelReviewPanel(aModel);
-		tabbedPane.addTab("review model", mReviewTab);
+		mReviewTab.setPreferredSize(new Dimension(800, 600));
+		contentPane2.add(mReviewTab, JSplitPane.TOP);
 
-		mStrategyTab = new StrategyCreationPanel();
-		tabbedPane.addTab("cutting strategy", mStrategyTab);
+		//mCurrentStrategyTab = new StrategyCreationPanel("roughing");
+		onStrategyStepChanged(new StrategyCreationPanel("roughing"));
+		mStrategyStepsModel.addElement(mCurrentStrategyTab);
+		//mCurrentStrategyTab.setBorder(new TitledBorder(null, "roughing", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		//mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
 
-		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategyTab);
-		tabbedPane.addTab("generate G-Code", mGCodeTab);
+		mGCodeTab = new GCodePanel(aModel, mReviewTab, mCurrentStrategyTab);
+		contentPane2.add(mGCodeTab, JSplitPane.BOTTOM);
+		
+		
+		contentPane2.setDividerLocation(0.2);
+		contentPane.setDividerLocation(0.3);
 	}
 
+	private JList getStrategyStepsList() {
+		if (mStrategySteps == null) {
+			mStrategySteps = new JList();
+			mStrategyStepsModel = new DefaultListModel();
+			mStrategySteps.setModel(mStrategyStepsModel);
+			mStrategySteps.addListSelectionListener(new ListSelectionListener() {
+
+				@Override
+				public void valueChanged(ListSelectionEvent arg0) {
+					StrategyCreationPanel s = (StrategyCreationPanel) mStrategySteps.getSelectedValue();
+					onStrategyStepChanged(s);
+
+				}
+			});
+		}
+    	return mStrategySteps;
+	}
+
+	protected void onStrategyStepChanged(final StrategyCreationPanel aStep) {
+		if (mCurrentStrategyTab != null) {
+			mLeftPane.remove(mCurrentStrategyTab);
+		}
+		mCurrentStrategyTab = aStep;
+		mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
+		mCurrentStrategyTab.setBorder(new TitledBorder(null, aStep.toString(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		
+	}
 }
