@@ -254,6 +254,7 @@ public class StrategyCreationPanel extends JPanel {
 		 * For {@link Serializable}.
 		 */
 		private static final long serialVersionUID = 2957137275776885590L;
+		private JTextField name = new JTextField("new tool");
 		private JTextField diameter = new JTextField("1.0");
 		private JTextField length 	= new JTextField("10.0");
 		private JTextField shaftDiameter = new JTextField("0.5");
@@ -265,7 +266,10 @@ public class StrategyCreationPanel extends JPanel {
 			}
 			initialized = true;
 			JPanel panel = this;
-			panel.setLayout(new GridLayout(3, 1));
+			panel.setLayout(new GridLayout(4, 1));
+
+			panel.add(new JLabel("name:"), null);
+			panel.add(name, null);
 
 			panel.add(new JLabel("ball diameter:"), null);
 			panel.add(diameter, null);
@@ -279,7 +283,7 @@ public class StrategyCreationPanel extends JPanel {
 			return panel;
 		}
 		public Tool getTool() {
-			return Tool.createBallCutter(Double.parseDouble(diameter.getText()),
+			return Tool.createBallCutter(name.getText(), Double.parseDouble(diameter.getText()),
 					Double.parseDouble(length.getText()),
 					Double.parseDouble(shaftDiameter.getText()));
 		}
@@ -293,6 +297,7 @@ public class StrategyCreationPanel extends JPanel {
 		 * For {@link Serializable}.
 		 */
 		private static final long serialVersionUID = -7515866218730158209L;
+		private JTextField name = new JTextField("new tool");
 		private JTextField diameter = new JTextField("1.0");
 		private JTextField length = new JTextField("10.0");
 		private JTextField cutterLength = new JTextField("5.0");
@@ -306,6 +311,9 @@ public class StrategyCreationPanel extends JPanel {
 			initialized = true;
 			JPanel panel = this;
 			panel.setLayout(new GridLayout(4, 2));
+
+			panel.add(new JLabel("name:"), null);
+			panel.add(name, null);
 
 			panel.add(new JLabel("diameter:"), null);
 			panel.add(diameter, null);
@@ -322,7 +330,7 @@ public class StrategyCreationPanel extends JPanel {
 			return panel;
 		}
 		public Tool getTool() {
-			return Tool.createFlatCutter(Double.parseDouble(diameter.getText()),
+			return Tool.createFlatCutter(name.getText(), Double.parseDouble(diameter.getText()),
 					Double.parseDouble(cutterLength.getText()),
 					Double.parseDouble(length.getText()),
 					Double.parseDouble(shaftDiameter.getText()));

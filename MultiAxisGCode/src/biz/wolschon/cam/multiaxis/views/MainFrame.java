@@ -13,6 +13,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
+import biz.wolschon.cam.multiaxis.settings.Preferences;
+import biz.wolschon.cam.multiaxis.tools.ToolRepository;
 import biz.wolschon.cam.multiaxis.views.StrategyStepsPanel.CurrentStrategyStepListener;
 
 import javax.swing.border.TitledBorder;
@@ -25,6 +27,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 	private static final long serialVersionUID = -582634794848211670L;
 	private JSplitPane contentPane;
 	private JPanel mLeftPane;
+	private ToolRepository mTools = new ToolRepository(new Preferences());
 
 	/**
 	 * Launch the application.
