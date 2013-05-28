@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 import java.io.IOException;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -16,9 +17,11 @@ import javax.swing.JSplitPane;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.ui.Wizard1Loader;
+import biz.wolschon.cam.multiaxis.views.StrategyStepsPanel.CurrentStrategyStepListener;
+
 import javax.swing.border.TitledBorder;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 
 	private JSplitPane contentPane;
 	private JPanel mLeftPane;
@@ -70,8 +73,7 @@ public class MainFrame extends JFrame {
 	 * progress bar and save button for code.
 	 */
 	private GCodePanel mGCodeTab;
-	private JList mStrategySteps; //TODO: roughing,finishing,contour
-	private DefaultListModel mStrategyStepsModel;
+	private StrategyStepsPanel mStrategySteps;
 	/**
 	 * Create the frame.
 	 */
@@ -93,13 +95,10 @@ public class MainFrame extends JFrame {
 		mReviewTab.setPreferredSize(new Dimension(800, 600));
 		contentPane2.add(mReviewTab, JSplitPane.TOP);
 
-		//mCurrentStrategyTab = new StrategyCreationPanel("roughing");
 		onStrategyStepChanged(new StrategyCreationPanel("roughing"));
-		mStrategyStepsModel.addElement(mCurrentStrategyTab);
-		//mCurrentStrategyTab.setBorder(new TitledBorder(null, "roughing", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		//mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
+		mStrategySteps.addStrategyStep(mCurrentStrategyTab);
 
-		mGCodeTab = new GCodePanel(aModel, mReviewTab, mCurrentStrategyTab);
+		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategySteps);
 		contentPane2.add(mGCodeTab, JSplitPane.BOTTOM);
 		
 		
@@ -107,25 +106,15 @@ public class MainFrame extends JFrame {
 		contentPane.setDividerLocation(0.3);
 	}
 
-	private JList getStrategyStepsList() {
+	private JComponent getStrategyStepsList() {
 		if (mStrategySteps == null) {
-			mStrategySteps = new JList();
-			mStrategyStepsModel = new DefaultListModel();
-			mStrategySteps.setModel(mStrategyStepsModel);
-			mStrategySteps.addListSelectionListener(new ListSelectionListener() {
-
-				@Override
-				public void valueChanged(ListSelectionEvent arg0) {
-					StrategyCreationPanel s = (StrategyCreationPanel) mStrategySteps.getSelectedValue();
-					onStrategyStepChanged(s);
-
-				}
-			});
+			mStrategySteps = new StrategyStepsPanel();
+			mStrategySteps.setListener(this);
 		}
     	return mStrategySteps;
 	}
 
-	protected void onStrategyStepChanged(final StrategyCreationPanel aStep) {
+	public void onStrategyStepChanged(final StrategyCreationPanel aStep) {
 		if (mCurrentStrategyTab != null) {
 			mLeftPane.remove(mCurrentStrategyTab);
 		}

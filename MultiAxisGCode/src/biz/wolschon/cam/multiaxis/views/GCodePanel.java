@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -43,8 +44,13 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	private static class GCodeLine {
 		private String mLine;
 		private double[] mToolLocation;
-		public GCodeLine (final String aLine, final double[] aToolLocation) {
+		private Tool mTool;
+		public Tool getTool() {
+			return mTool;
+		}
+		public GCodeLine (final String aLine, final double[] aToolLocation, final Tool aTool) {
 			this.mLine = aLine;
+			this.mTool = aTool;
 			if (aToolLocation != null) {
 				this.mToolLocation = Arrays.copyOf(aToolLocation, aToolLocation.length);
 			}
@@ -69,12 +75,8 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	private JList codeList;
 	private JButton mSaveButton;
 	private DefaultListModel codeListModel;
-	private StrategyCreationPanel mStrategyPanel;
+	private StrategyStepsPanel mStrategyPanel;
 	private ModelReviewPanel mReviewTab;
-	/**
-	 * The tool we use Currently fixed to a 1.0mm ball nose cutter.
-	 */
-	private Tool mTool = new Tool(1.0d);
 	private JProgressBar mProgressBar;
 	private static final NumberFormat PERCENT_FORMAT = NumberFormat.getPercentInstance();
 
@@ -83,10 +85,10 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	 * If a ModelReviewPanel is given, a click inside the g-code list will show that tool position in the ModelReviewPanel.
 	 * @param reviewTab may be null
 	 */
-	public GCodePanel(final IModel aModel, final ModelReviewPanel aReviewTab, final StrategyCreationPanel aStrategyPanel) {
+	public GCodePanel(final IModel aModel, final ModelReviewPanel aReviewTab, final StrategyStepsPanel aStrategySteps) {
 		this.mModel = aModel;
 		this.mReviewTab = aReviewTab;
-		this.mStrategyPanel = aStrategyPanel;
+		this.mStrategyPanel = aStrategySteps;
 		setLayout(new BorderLayout(0, 0));
 		
 		mSaveButton = new JButton("save");
@@ -146,7 +148,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 					return; // header
 				}
 				System.out.println("selected: '" + line + "' " + Arrays.toString(toolLocation));
-				mReviewTab.setTool(mTool);
+				mReviewTab.setTool(line.getTool());
 				mReviewTab.setToolLocation(toolLocation);
 				
 			}
@@ -207,27 +209,32 @@ public class GCodePanel extends JPanel implements IProgressListener {
 			// always write to a temporary file
 			// TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
 			FileWriter outfile = new FileWriter("/tmp/out-" + System.currentTimeMillis() + ".gcode");
-			mTool = mStrategyPanel.getTool();
-			codeListModel.clear();
-			GCodeWriterStrategy out = new GCodeWriterStrategy(outfile) {
-				@Override
-				protected void writeCodeLine(final String aLine, final double[] aLocation) throws IOException {
-					super.writeCodeLine(aLine, aLocation);
-					codeListModel.addElement(new GCodeLine(aLine, aLocation));
-				}
-			};
-			IStrategy strategy = mStrategyPanel.getStrategy(out, mModel);
+			List<StrategyCreationPanel> steps = mStrategyPanel.getAllStrategies();
 			try {
-				double[] startLocation = new double[] {
-						mModel.getCenterX(),
-						mModel.getCenterY(),
-						mModel.getCenterZ(),
-						0 // A axis
-						// no B axis
-				};
-				strategy.addProgressListener(GCodePanel.this);
-				strategy.runStrategy(startLocation);
-				strategy.endStrategy();
+				for (StrategyCreationPanel strategyStep : steps) {
+
+					final Tool tool = strategyStep.getTool();
+					codeListModel.clear();
+					GCodeWriterStrategy out = new GCodeWriterStrategy(outfile) {
+						@Override
+						protected void writeCodeLine(final String aLine, final double[] aLocation) throws IOException {
+							super.writeCodeLine(aLine, aLocation);
+							codeListModel.addElement(new GCodeLine(aLine, aLocation, tool));
+						}
+					};
+					IStrategy strategy = strategyStep.getStrategy(out, mModel);
+					double[] startLocation = new double[] {
+							mModel.getCenterX(),
+							mModel.getCenterY(),
+							mModel.getCenterZ(),
+							0 // A axis
+							// no B axis
+					};
+					strategy.addProgressListener(GCodePanel.this);
+					strategy.runStrategy(startLocation);
+					strategy.endStrategy();
+
+				}
 			} finally {
 				outfile.flush();
 				outfile.close();
