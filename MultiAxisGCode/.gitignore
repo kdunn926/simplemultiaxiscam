@@ -1,2 +1,4 @@
 /bin
 /.settings
+/MultiAxisGCode*.jar
+/.DS_Store
