@@ -9,7 +9,9 @@ import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import biz.wolschon.cam.multiaxis.settings.Preferences;
 
@@ -28,7 +30,10 @@ public class ToolRepository {
 	 */
 	private Collection<Tool> mTools = new LinkedList<Tool>();
 
+	private Preferences mPrefrences;
+
 	public ToolRepository(final Preferences prefs) {
+		this.mPrefrences = prefs;
 		File dir = prefs.getToolsDirectory();
 		File[] toolFiles = dir.listFiles(new FileFilter() {
 			
@@ -118,13 +123,13 @@ public class ToolRepository {
 				switch (toolType) {
 				case 0: {
 					Tool flatTip = Tool.createFlatCutter(toolName, toolDiameter, toolCuttingLength, toolFreeLength, toolShaftDiameter);
-					addTool(flatTip);
+					addTool(flatTip, false);
 					break;
 				}
 				//case 2 : conic engraving tools
 				case 3: {
 					Tool ballNose = Tool.createBallCutter(toolName, toolDiameter, toolFreeLength, toolShaftDiameter);
-					addTool(ballNose);
+					addTool(ballNose, false);
 					break;
 				}
 				//cae 4 : smattened tools
@@ -141,8 +146,17 @@ public class ToolRepository {
 
 	/**
 	 * @param ballNose
+	 * @param aSaveToFile 
 	 */
-	protected void addTool(Tool ballNose) {
+	public void addTool(Tool ballNose, boolean aSaveToFile) {
 		mTools.add(ballNose);
+		if (aSaveToFile) {
+			File dir = mPrefrences.getToolsDirectory();
+			dir.mkdirs();
+			//TODO: save tool File outputFile = new File(dir, );
+		}
+	}
+	public Collection<Tool> getAllTools() {
+		return Collections.unmodifiableCollection(mTools);
 	}
 }

@@ -98,7 +98,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		mReviewTab.setPreferredSize(new Dimension(800, 600));
 		contentPane2.add(mReviewTab, JSplitPane.TOP);
 
-		onStrategyStepChanged(new StrategyCreationPanel("roughing"));
+		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools));
 		mStrategySteps.addStrategyStep(mCurrentStrategyTab);
 
 		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategySteps);
@@ -111,7 +111,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 
 	private JComponent getStrategyStepsList() {
 		if (mStrategySteps == null) {
-			mStrategySteps = new StrategyStepsPanel();
+			mStrategySteps = new StrategyStepsPanel(mTools);
 			mStrategySteps.setListener(this);
 		}
     	return mStrategySteps;

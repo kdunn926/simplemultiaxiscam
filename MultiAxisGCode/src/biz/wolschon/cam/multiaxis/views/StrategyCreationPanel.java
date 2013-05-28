@@ -2,15 +2,20 @@ package biz.wolschon.cam.multiaxis.views;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.Serializable;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -22,6 +27,7 @@ import biz.wolschon.cam.multiaxis.strategy.IStrategy;
 import biz.wolschon.cam.multiaxis.strategy.LinearStrategy;
 import biz.wolschon.cam.multiaxis.strategy.StraightZCutStrategy;
 import biz.wolschon.cam.multiaxis.tools.Tool;
+import biz.wolschon.cam.multiaxis.tools.ToolRepository;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
 /**
@@ -57,9 +63,9 @@ public class StrategyCreationPanel extends JPanel {
 	 */
 	private JList mStrategies;
 	/**
-	 * Currently selected tool and also the JPanel for entering it's parameters.
+	 * Currently selected tool.
 	 */
-	private ToolSelection mToolPanel;
+	private Tool mTool;
 	/**
 	 * Currently selected strategy and also the JPanel for entering it's parameters.
 	 */
@@ -218,130 +224,14 @@ public class StrategyCreationPanel extends JPanel {
 			return new ChainStrategy(parent0, parent1);
 		}
 	};
-	/**
-	 * Abstract interface for a selectable tool and it's UI.
-	 */
-	private static abstract class ToolSelection extends JPanel {
-		/**
-		 * For {@link Serializable}.
-		 */
-		private static final long serialVersionUID = -4892718902569153906L;
-		private String mLabel;
-		public ToolSelection(final String aLabel) {
-			this.mLabel = aLabel;
-		}
-		/**
-		 * @see returns the label.
-		 */
-		@Override
-		public String toString() {
-			return mLabel;
-		}
-		/**
-		 * Tool specific panel to enter the parameters.
-		 */
-		public abstract JPanel getPanel();
-		/**
-		 * Create the tool according to the user entered parameters.
-		 */
-		public abstract Tool getTool();
-	}
-	/**
-	 * Our default tool (a ball shaped cutter).
-	 */
-	private final ToolSelection TOOL0 = new ToolSelection("Ball Nose") {
-		/**
-		 * For {@link Serializable}.
-		 */
-		private static final long serialVersionUID = 2957137275776885590L;
-		private JTextField name = new JTextField("new tool");
-		private JTextField diameter = new JTextField("1.0");
-		private JTextField length 	= new JTextField("10.0");
-		private JTextField shaftDiameter = new JTextField("0.5");
-		private boolean initialized = false;
-		@Override
-		public JPanel getPanel() {
-			if (initialized) {
-				return this;
-			}
-			initialized = true;
-			JPanel panel = this;
-			panel.setLayout(new GridLayout(4, 1));
-
-			panel.add(new JLabel("name:"), null);
-			panel.add(name, null);
-
-			panel.add(new JLabel("ball diameter:"), null);
-			panel.add(diameter, null);
-
-			panel.add(new JLabel("full length:"), null);
-			panel.add(length, null);
-
-			panel.add(new JLabel("shaft diameter:"), null);
-			panel.add(shaftDiameter, null);
-
-			return panel;
-		}
-		public Tool getTool() {
-			return Tool.createBallCutter(name.getText(), Double.parseDouble(diameter.getText()),
-					Double.parseDouble(length.getText()),
-					Double.parseDouble(shaftDiameter.getText()));
-		}
-	};
-
-	/**
-	 * A flat cutter tool.
-	 */
-	private final ToolSelection TOOL1 = new ToolSelection("Flat Cutter") {
-		/**
-		 * For {@link Serializable}.
-		 */
-		private static final long serialVersionUID = -7515866218730158209L;
-		private JTextField name = new JTextField("new tool");
-		private JTextField diameter = new JTextField("1.0");
-		private JTextField length = new JTextField("10.0");
-		private JTextField cutterLength = new JTextField("5.0");
-		private JTextField shaftDiameter = new JTextField("0.5");
-		private boolean initialized = false;
-		@Override
-		public JPanel getPanel() {
-			if (initialized) {
-				return this;
-			}
-			initialized = true;
-			JPanel panel = this;
-			panel.setLayout(new GridLayout(4, 2));
-
-			panel.add(new JLabel("name:"), null);
-			panel.add(name, null);
-
-			panel.add(new JLabel("diameter:"), null);
-			panel.add(diameter, null);
-
-			panel.add(new JLabel("cutter  length:"), null);
-			panel.add(cutterLength, null);
-
-			panel.add(new JLabel("full length:"), null);
-			panel.add(length, null);
-
-			panel.add(new JLabel("shaft diameter:"), null);
-			panel.add(shaftDiameter, null);
-
-			return panel;
-		}
-		public Tool getTool() {
-			return Tool.createFlatCutter(name.getText(), Double.parseDouble(diameter.getText()),
-					Double.parseDouble(cutterLength.getText()),
-					Double.parseDouble(length.getText()),
-					Double.parseDouble(shaftDiameter.getText()));
-		}
-	};
 	private JPanel mainPanel;
 	/**
 	 * Create the panel.
 	 */
-	public StrategyCreationPanel (final String aLabel) {
+	private ToolRepository mToolRepository;
+	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository) {
 		this.mLabel = aLabel;
+		this.mToolRepository = aToolRepository;
 		setLayout(new BorderLayout());
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(7, 1));
@@ -351,20 +241,56 @@ public class StrategyCreationPanel extends JPanel {
 		add(mParameterSettings, BorderLayout.SOUTH);
 
 		//-------------- tool
-		mTools = new JList(new ToolSelection[] {TOOL0, TOOL1});
+		final DefaultListModel model = new DefaultListModel();
+		for (Tool tool : mToolRepository.getAllTools()) {
+			model.addElement(tool);
+		}
+		model.addElement("add...");
+		mTools = new JList(model);
+		mTools.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		mTools.addListSelectionListener(new ListSelectionListener() {
-			
+			private boolean disabled = false;
 			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				ToolSelection tool = (ToolSelection) mTools.getSelectedValue();
-				onToolChanged(tool);
+			public void valueChanged(ListSelectionEvent anEvent) {
+				Object selectedValue = mTools.getSelectedValue();
+				if (!(selectedValue instanceof Tool)) {
+					if (disabled || selectedValue == null || anEvent.getValueIsAdjusting()) {
+						return;
+					}
+					final JDialog dlg = new JDialog();
+					dlg.setTitle("" + System.currentTimeMillis());
+					final ToolCreationPanel toolCreationPanel = new ToolCreationPanel();
+					toolCreationPanel.getSaveButton().addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent aArg0) {
+							disabled = true;
+							try {
+								Tool createdTool = toolCreationPanel.getTool();
+								dlg.setVisible(false);
+								dlg.dispose();
+								model.insertElementAt(createdTool, model.size() - 1);// insert before "add..."
+								mTools.setSelectedValue(createdTool, true);
+								mToolRepository.addTool(createdTool, true);
+							} finally {
+								disabled = false;
+							}
+						}
+					});
+					dlg.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dlg.setContentPane(toolCreationPanel);
+					dlg.pack();//TODO: listner
+					dlg.setVisible(true);
+					return;
+				}
+				Tool tool = (Tool) selectedValue;
+				StrategyCreationPanel.this.mTool = tool;
 				
 			}
 		});
 		mainPanel.add(new JScrollPane(mTools), null);
-		mTools.setSelectedValue(TOOL0, true);
+		mTools.setSelectedIndex(0);
 		mTools.setVisibleRowCount(1);
-		onToolChanged(TOOL0);
 
 		mainPanel.add(new JLabel("[---] tool RPM"), null);
 		mainPanel.add(new JLabel("[use model size] segment"), null);
@@ -372,6 +298,7 @@ public class StrategyCreationPanel extends JPanel {
 		//-------------- strategy
 		//TODO: add waterline strategy
 		mStrategies = new JList(new StrategySelection[] {PARALLEL, CROSSWISE});
+		mStrategies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		mStrategies.addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
@@ -400,20 +327,6 @@ public class StrategyCreationPanel extends JPanel {
 	}
 
 	/**
-	 * The user has selected a new tool, show it's UI, so the user can select parameters.
-	 */
-	private void onToolChanged(final ToolSelection aToolSelection) {
-		if (mToolPanel != null) {
-			mParameterSettings.remove(mToolPanel);
-			mToolPanel = null;
-		}
-		//TODO: clean this up
-		mToolPanel = (ToolSelection) aToolSelection.getPanel();
-		mParameterSettings.addTab("tool settings", mToolPanel);
-		invalidate();
-	}
-
-	/**
 	 * The user has selected a new strategy, show it's UI, so the user can select parameters.
 	 */
 	private void onStrategyChanged(final StrategySelection aStrategySelection) {
@@ -428,7 +341,7 @@ public class StrategyCreationPanel extends JPanel {
 	}
 
 	public Tool getTool() {
-		return mToolPanel.getTool();
+		return mTool;
 	}
 	/**
 	 * Create the strategy chain of command to execute on the model.

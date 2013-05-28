@@ -12,6 +12,7 @@ public class Tool {
 	//}
 	private Tool(final String aToolName, IToolShape shapes0, IToolShape shapes1) {
 		this.mShapes = new IToolShape[] {shapes0, shapes1};
+		this.mToolName = aToolName;
 	}
 	/**
 	 * Construct a ball not cutter.

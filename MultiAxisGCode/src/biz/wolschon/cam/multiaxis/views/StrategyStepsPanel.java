@@ -23,6 +23,8 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import biz.wolschon.cam.multiaxis.tools.ToolRepository;
+
 /**
  * @author marcuswolschon
  *
@@ -42,6 +44,7 @@ public class StrategyStepsPanel extends JPanel {
 		void onStrategyStepChanged(StrategyCreationPanel aNewStep);
 	}
 
+	private final ToolRepository mToolsRepository;
 	private StrategyCreationPanel mCurrentStep;
 	private CurrentStrategyStepListener mListener;
 	private JList mStrategySteps;
@@ -59,7 +62,8 @@ public class StrategyStepsPanel extends JPanel {
 		}
 	}
 
-	public StrategyStepsPanel() {
+	public StrategyStepsPanel(final ToolRepository aToolsRepository) {
+		this.mToolsRepository = aToolsRepository;
 		setLayout(new BorderLayout());
 		mStrategySteps = new JList();
 		mStrategyStepsModel = new DefaultListModel();
@@ -126,7 +130,7 @@ public class StrategyStepsPanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent aIgnored) {
-					addStrategyStep(new StrategyCreationPanel("new"));
+					addStrategyStep(new StrategyCreationPanel("new", mToolsRepository));
 				}
 			});
 		}
