@@ -4,15 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.io.IOException;
+import java.io.Serializable;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.JSplitPane;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
@@ -23,6 +20,10 @@ import javax.swing.border.TitledBorder;
 
 public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 
+	/**
+	 * For {@link Serializable}.
+	 */
+	private static final long serialVersionUID = -582634794848211670L;
 	private JSplitPane contentPane;
 	private JPanel mLeftPane;
 
@@ -119,8 +120,9 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 			mLeftPane.remove(mCurrentStrategyTab);
 		}
 		mCurrentStrategyTab = aStep;
-		mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
-		mCurrentStrategyTab.setBorder(new TitledBorder(null, aStep.toString(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		
+		if (mCurrentStrategyTab != null) {
+			mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
+			mCurrentStrategyTab.setBorder(new TitledBorder(null, aStep.toString(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		}
 	}
 }

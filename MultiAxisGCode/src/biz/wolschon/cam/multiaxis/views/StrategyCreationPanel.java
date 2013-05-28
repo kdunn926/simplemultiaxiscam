@@ -65,6 +65,14 @@ public class StrategyCreationPanel extends JPanel {
 	private StrategySelection mStrategyPanel;
 
 	private String mLabel;
+	public String getLabel() {
+		return mLabel;
+	}
+
+	public void setLabel(String aLabel) {
+		mLabel = aLabel;
+	}
+
 	/**
 	 * Abstract interface for a selectable strategy and it's UI.
 	 */
