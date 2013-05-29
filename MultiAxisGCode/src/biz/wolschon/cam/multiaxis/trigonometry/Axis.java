@@ -6,7 +6,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 /**
  * Possible axis of movement.
- * TODO: A and B axis rotate around the x=y=z=0 origin
  */
 public enum Axis {
 	X {
