@@ -17,6 +17,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -106,6 +107,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 		codeList = new JList();
 		codeListModel = new GCodeModel();
 		codeList.setModel(codeListModel);
+		codeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		codeList.addListSelectionListener(new ListSelectionListener() {
 			
 			@Override
