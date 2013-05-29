@@ -1,13 +1,24 @@
 package biz.wolschon.cam.multiaxis.views;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import javax.swing.DefaultListModel;
 
 import biz.wolschon.cam.multiaxis.tools.Tool;
 
-public class GCodeModel extends DefaultListModel {
+/**
+ * TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
+ * @author marcuswolschon
+ *
+ */
+public class GCodeModel extends javax.swing.AbstractListModel {
 
+	/**
+	 * For {@link Serializable}.
+	 */
+	private static final long serialVersionUID = -2039113947665731751L;
 	/**
 	 * Helper-class for the ListModel.
 	 * Wraps a line of G-Code to display and the corresponding tool-location.
@@ -38,9 +49,26 @@ public class GCodeModel extends DefaultListModel {
 			return mLine;
 		}
 	}
+	private List<GCodeLine> mGCodeLines = new ArrayList<GCodeLine>();
 	public double[] getToolLocation(int anIndex) {
-		GCodeLine line = (GCodeLine) get(anIndex);
+		GCodeLine line = getElementAt(anIndex);
 		return line.getToolLocation();
+	}
+	@Override
+	public GCodeLine getElementAt(int anIndex) {
+		return mGCodeLines.get(anIndex);
+	}
+	@Override
+	public int getSize() {
+		return mGCodeLines.size();
+	}
+	public void addElement(final GCodeLine aGCodeLine) {
+		this.mGCodeLines.add(aGCodeLine);
+		fireIntervalAdded(this, getSize() - 1, getSize());
+	}
+	public void clear() {
+		this.mGCodeLines.clear();
+		fireContentsChanged(this, 0, 0);		
 	}
 
 }

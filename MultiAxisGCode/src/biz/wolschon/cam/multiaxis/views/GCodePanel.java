@@ -11,7 +11,6 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
@@ -163,7 +162,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 						int lines = codeListModel.getSize();
 						String newline = System.getProperty("line.separator");
 						for (int i = 0; i < lines; i++) {
-							outfile.write(codeListModel.get(i).toString());
+							outfile.write(codeListModel.getElementAt(i).toString());
 							outfile.write(newline);
 						}
 					} finally {
@@ -186,7 +185,6 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	protected void onGenerateGCode() {
 		try {
 			// always write to a temporary file
-			// TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
 			FileWriter outfile = new FileWriter("/tmp/out-" + System.currentTimeMillis() + ".gcode");
 			List<StrategyCreationPanel> steps = mStrategyPanel.getAllStrategies();
 			try {
