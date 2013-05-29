@@ -86,7 +86,7 @@ public class GCodeWriterStrategy implements IStrategy {
 		if (Double.isNaN(aNextToolLocation)) {
 			throw new IllegalArgumentException("cannot format NotANumber");
 		}
-		//TODO: limit the number of decimal places
+		// limit the number of decimal places
  		return NUMBERFORMAT.format(aNextToolLocation);
 	}
 

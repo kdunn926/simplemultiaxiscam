@@ -9,7 +9,7 @@ import java.util.List;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 
 /**
- * TODO: use this file for codeListModel to lift the 32767 array element limit and cut down on memory usage
+ * Custom list model that is type-safe for storing only {@link GCodeLine}s.
  * @author marcuswolschon
  *
  */

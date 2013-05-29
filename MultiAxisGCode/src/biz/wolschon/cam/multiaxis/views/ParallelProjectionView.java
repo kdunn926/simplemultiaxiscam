@@ -259,13 +259,14 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
-		// draw mesh
+		// prepare drawing the mesh
 		double horizontalScale = getWidth() / (mHorizontalMax - mHorizontalMin);
 		double verticalScale = getHeight() / (mVerticalMax - mVerticalMin);
 		this.scale = Math.min(horizontalScale, verticalScale) / 3.0d;
 		this.horizontalOffset = getWidth()/2;
 		this.verticalOffset = getHeight()/2;
-		//TODO: draw mesh
+
+		// draw the mesh
 		int count = mModel.getTriangleCount();
 		g.setColor(Color.WHITE);
 		for(int i=0; i<count; i++) {
@@ -275,10 +276,7 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 			int[] project0 = projectPoint3D(triangle.getP1(), scale);
 			int[] project1 = projectPoint3D(triangle.getP2(), scale);
 			int[] project2 = projectPoint3D(triangle.getP3(), scale);
-/*System.out.println("painting triangle #" + i + " at "
-		+ project0[0] + ":" + project0[1] + " - "
-		+ project1[0] + ":" + project1[1] + " - "
-		+ project2[0] + ":" + project2[1] + " - ");*/
+
 			//TODO: allow solid in addition to wireframe
 			g.drawLine(project0[0], project0[1], project1[0], project1[1]);
 			g.drawLine(project1[0], project1[1], project2[0], project2[1]);

@@ -86,16 +86,17 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	@Override
 	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
 		Rotation rotA = Axis.A.getRotation(aStartLocation[Axis.A.ordinal()]);
+		// collisions come sorted by distance
 		SortedSet<Collision> collisions = diveForCollisions(aStartLocation, rotA);
 		if (collisions.size() == 0) {
+			// cut all the way through (hole)
 			runStrategyHole(aStartLocation ,isCutting);
-			return; // TODO: cut all the way through (hole)
+			return;
 		}
 		if (collisions.size() > 2) {
 			// we detected a non-convex patch
 			runStrategyNonConvex(aStartLocation, collisions, rotA, isCutting);
 		}
-		//TODO: sort collisions by distance
 
 		runStrategyCollision(aStartLocation, collisions.first(), rotA, isCutting);
 	}

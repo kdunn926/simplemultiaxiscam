@@ -286,7 +286,7 @@ public class StrategyCreationPanel extends JPanel {
 					});
 					dlg.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dlg.setContentPane(toolCreationPanel);
-					dlg.pack();//TODO: listner
+					dlg.pack();
 					dlg.setVisible(true);
 					return;
 				}
@@ -350,7 +350,6 @@ public class StrategyCreationPanel extends JPanel {
 			mParameterSettings.remove(mStrategyPanel);
 			mStrategyPanel = null;
 		}
-		//TODO: clean this up
 		mStrategyPanel = (StrategySelection) aStrategySelection.getPanel();
 		mParameterSettings.addTab("strategy settings", mStrategyPanel);
 		invalidate();

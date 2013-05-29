@@ -194,7 +194,6 @@ public class ToolCreationPanel extends JPanel {
 			remove(mToolPanel);
 			mToolPanel = null;
 		}
-		//TODO: clean this up
 		mToolPanel = (ToolSelection) aToolSelection.getPanel();
 		add(mToolPanel, BorderLayout.CENTER);
 		invalidate();
