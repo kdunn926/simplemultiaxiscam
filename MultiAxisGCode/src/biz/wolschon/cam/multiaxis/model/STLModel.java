@@ -22,6 +22,11 @@ import biz.wolschon.cam.multiaxis.tools.IToolShape;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
+/**
+ * A model using polygons read from an ASCII or binary STL file.
+ * @author marcuswolschon
+ *
+ */
 public class STLModel implements IModel {
     /**
      * Size of a binary STL header.
@@ -33,7 +38,11 @@ public class STLModel implements IModel {
     private int mLineCount = 0;
 
 
-	public STLModel(File f) throws IOException {
+    /**
+     * @param f file to read the model from.
+     * @throws IOException
+     */
+	public STLModel(final File f) throws IOException {
 		System.out.println("loading " + f.getAbsolutePath());
 		
 		FileReader reader = new FileReader(f);

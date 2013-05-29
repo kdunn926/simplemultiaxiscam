@@ -7,6 +7,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
+/**
+ * A model may use polygons or CSG. This interface *should* be agnostic to that.
+ * @author marcuswolschon
+ *
+ */
 public interface IModel {
 
 	double getCenterX();
