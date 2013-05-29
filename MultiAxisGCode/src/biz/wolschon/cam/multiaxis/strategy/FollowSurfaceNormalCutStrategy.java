@@ -97,6 +97,12 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 		getNextStrategy().runStrategy(childLocation, isCutting);
 	}
 
+	/**
+	 * 
+	 * @param aTopmost
+	 * @param aCollision
+	 * @return true if both collisions are the same within reasonable tollerances.
+	 */
 	private boolean isSameCollision(Collision aTopmost, Collision aCollision) {
 		//TODO: happens when it should not happen if (aTopmost.getCollidingPolygon() != aCollision.getCollidingPolygon()) {
 		//	System.err.println("colliding with another polygon");
@@ -108,8 +114,16 @@ public class FollowSurfaceNormalCutStrategy extends StraightZCutStrategy {
 			System.err.println("colliding using another part of the tool");
 			return false;
 		}
-		
-		// TODO compare coordinates using an epsilon
+
+		// compare coordinates using an epsilon
+//		final double epsilon = 0.2d;
+//		double distance = Math.abs(aTopmost.getCollisionPoint().getX() - aCollision.getCollisionPoint().getX());
+//		distance += Math.abs(aTopmost.getCollisionPoint().getY() - aCollision.getCollisionPoint().getY());
+//		distance += Math.abs(aTopmost.getCollisionPoint().getZ() - aCollision.getCollisionPoint().getZ());
+//		if(distance > epsilon) {
+//			System.err.println("colliding in another spot.");
+//			return false;
+//		}
 		return true;
 	}
 
