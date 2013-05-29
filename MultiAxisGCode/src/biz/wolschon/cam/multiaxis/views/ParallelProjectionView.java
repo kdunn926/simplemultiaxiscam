@@ -198,7 +198,7 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 			g.setColor(Color.BLUE);
 			g.fillRect(0, 0, getWidth(), getHeight());
 		}
-		// draw toolpath
+		// draw tool path
 		if (isShowPath() && getGCodeModel() != null) {
 			if (mPathDoubleBuffer == null ||
 				mPathDoubleBuffer.getWidth() != getWidth() ||
@@ -235,6 +235,10 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 		}
 	}
 
+	/**
+	 * Paint the tool path to the given graphics. Don't fill the background to allow for transparency.
+	 * @param g the graphics of a BufferedImage
+	 */
 	private void paintPathToBuffer(final Graphics2D g) {
 		// show tool path
 		GCodeModel model = getGCodeModel();
@@ -252,7 +256,8 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 		}
 	}
 	/**
-	 * Do the actual painting. Called by #paintcomponent(Graphics);
+	 * Do the actual painting of the geometry. Called by {@link #paintComponent(Graphics)}.
+	 * @param g the graphics of a BufferedImage
 	 */
 	private void paintGeometryToBuffer(final Graphics2D g) {
 		// fill background
