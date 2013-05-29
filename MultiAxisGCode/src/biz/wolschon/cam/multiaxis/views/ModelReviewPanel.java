@@ -1,6 +1,9 @@
 package biz.wolschon.cam.multiaxis.views;
 
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import biz.wolschon.cam.multiaxis.model.IModel;
 import biz.wolschon.cam.multiaxis.tools.Tool;
@@ -19,6 +22,9 @@ public class ModelReviewPanel extends JPanel {
 	private ParallelProjectionView panelYZ;
 	private ParallelProjectionView panelXY;
 
+	private JCheckBox mShowPath = new JCheckBox("show toolpath");
+	private JCheckBox mShowTool = new JCheckBox("show tool");
+	private JCheckBox mShowGeometry = new JCheckBox("show geometry");
 	/**
 	 * Create the panel.
 	 */
@@ -38,7 +44,42 @@ public class ModelReviewPanel extends JPanel {
 		add(panelXY);
 		
 		JPanel panel_3 = new JPanel();
+		panel_3.setLayout(new GridLayout(3, 1));
+		panel_3.add(mShowGeometry);
+		panel_3.add(mShowPath);
+		panel_3.add(mShowTool);
 		add(panel_3);
+
+		mShowPath.setSelected(panelXY.isShowPath());
+		mShowPath.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent aArg0) {
+				panelXZ.setShowPath(mShowPath.isSelected());
+				panelYZ.setShowPath(mShowPath.isSelected());
+				panelXY.setShowPath(mShowPath.isSelected());
+			}
+		});
+		mShowGeometry.setSelected(panelXY.isShowModel());
+		mShowGeometry.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent aArg0) {
+				panelXZ.setShowModel(mShowGeometry.isSelected());
+				panelYZ.setShowModel(mShowGeometry.isSelected());
+				panelXY.setShowModel(mShowGeometry.isSelected());
+			}
+		});
+		mShowTool.setSelected(panelXY.isShowTool());
+		mShowTool.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent aArg0) {
+				panelXZ.setShowTool(mShowTool.isSelected());
+				panelYZ.setShowTool(mShowTool.isSelected());
+				panelXY.setShowTool(mShowTool.isSelected());
+			}
+		});
 	}
 
 	public void setToolLocation(final double[] aToolLocation) {
@@ -51,4 +92,12 @@ public class ModelReviewPanel extends JPanel {
 		panelYZ.setTool(aTool);
 		panelXY.setTool(aTool);
 	}	
+	/**
+	 * @param aGCodeModel the gCodeModel to set
+	 */
+	public void setGCodeModel(final GCodeModel aGCodeModel) {
+		panelXZ.setGCodeModel(aGCodeModel);
+		panelYZ.setGCodeModel(aGCodeModel);
+		panelXY.setGCodeModel(aGCodeModel);
+	}
 }

@@ -103,6 +103,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 
 		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategySteps);
 		contentPane2.add(mGCodeTab, JSplitPane.BOTTOM);
+		mReviewTab.setGCodeModel(mGCodeTab.getCodeListModel());
 		
 		
 		contentPane2.setDividerLocation(0.2);

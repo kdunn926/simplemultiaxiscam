@@ -21,13 +21,15 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.swing.JPanel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 /**
  * Panel that shows a parallel projection of a model and a tool.
  */
-public class ParallelProjectionView extends JPanel {
+public class ParallelProjectionView extends JPanel implements ListDataListener {
 	/**
 	 * For {@link Serializable}.
 	 */
@@ -46,7 +48,7 @@ public class ParallelProjectionView extends JPanel {
 	 * <b>May be null</b>.
 	 */
 	private double[]  mToolLocation;
-
+	private GCodeModel mGCodeModel;
 	private Axis mAxisVertical = Axis.Z;
 	private double mVerticalMin;
 	private double mVerticalMax;
@@ -63,6 +65,20 @@ public class ParallelProjectionView extends JPanel {
 	private int horizontalOffset;
 	private int verticalOffset;
 	private String mLabel;
+
+	/**
+	 * Show the geometry.
+	 */
+	private boolean mShowModel = true;
+	/**
+	 * Show the tool.
+	 */
+	private boolean mShowTool = true;
+	/**
+	 * Show the tool path.
+	 */
+	private boolean mShowPath = false;
+	private BufferedImage mPathDoubleBuffer;
 	/**
 	 * Used for double buffering.
 	 */
@@ -121,6 +137,50 @@ public class ParallelProjectionView extends JPanel {
 	}
 
 	/**
+	 * @return the gCodeModel
+	 */
+	public GCodeModel getGCodeModel() {
+		return mGCodeModel;
+	}
+
+	/**
+	 * @param aGCodeModel the gCodeModel to set
+	 */
+	public void setGCodeModel(final GCodeModel aGCodeModel) {
+		if (mGCodeModel != null) {
+			mGCodeModel.removeListDataListener(this);
+		}
+		mGCodeModel = aGCodeModel;
+		mGCodeModel.addListDataListener(this);
+	}
+	public boolean isShowModel() {
+		return mShowModel;
+	}
+
+	public void setShowModel(boolean aShowModel) {
+		mShowModel = aShowModel;
+		repaint();
+	}
+
+	public boolean isShowTool() {
+		return mShowTool;
+	}
+
+	public void setShowTool(boolean aShowTool) {
+		mShowTool = aShowTool;
+		repaint();
+	}
+
+	public boolean isShowPath() {
+		return mShowPath;
+	}
+
+	public void setShowPath(boolean aShowPath) {
+		mShowPath = aShowPath;
+		repaint();
+	}
+
+	/**
 	 * Draw #mDoubleBuffer to the screen. Call #paintToBuffer(Graphics) with a new buffer if it is null or no longer matches our size on screen.
 	 */
 	
@@ -130,12 +190,27 @@ public class ParallelProjectionView extends JPanel {
 		    mDoubleBuffer.getWidth() != getWidth() ||
 		    mDoubleBuffer.getHeight() != getHeight()) {
 			mDoubleBuffer = mGraphicsConf.createCompatibleImage(getWidth(), getHeight());
-			paintToBuffer((Graphics2D) mDoubleBuffer.getGraphics());
+			paintGeometryToBuffer((Graphics2D) mDoubleBuffer.getGraphics());
 		}
-		g.drawImage(mDoubleBuffer, 0, 0, this);
-		
+		if (isShowModel()) {
+			g.drawImage(mDoubleBuffer, 0, 0, this);
+		} else {
+			g.setColor(Color.BLUE);
+			g.fillRect(0, 0, getWidth(), getHeight());
+		}
+		// draw toolpath
+		if (isShowPath() && getGCodeModel() != null) {
+			if (mPathDoubleBuffer == null ||
+				mPathDoubleBuffer.getWidth() != getWidth() ||
+				mPathDoubleBuffer.getHeight() != getHeight()) {
+				mPathDoubleBuffer = mGraphicsConf.createCompatibleImage(getWidth(), getHeight());
+				paintPathToBuffer((Graphics2D) mPathDoubleBuffer.getGraphics());
+			}
+			g.drawImage(mPathDoubleBuffer, 0, 0, Color.BLACK, this);
+			
+		}
 		// draw tool
-		if (mTool != null && mToolLocation != null) {
+		if (mTool != null && mToolLocation != null && isShowTool()) {
 			g.setColor(Color.RED);
 			for (IToolShape shape : mTool.getShape()) {
 				// draw tool on top of wireframe
@@ -158,10 +233,28 @@ public class ParallelProjectionView extends JPanel {
 		}
 	}
 
+	private void paintPathToBuffer(final Graphics2D g) {
+		// fill background
+		g.setColor(Color.BLACK);//new Color(0, 0, 0, 255));
+		g.fillRect(0, 0, getWidth(), getHeight());
+		// show tool path
+		GCodeModel model = getGCodeModel();
+		double[] lastLocation = null;
+		g.setColor(Color.LIGHT_GRAY);
+		for (int i = 0; i < model.getSize(); i++) {
+			double[] location = model.getToolLocation(i);
+			if (lastLocation != null) {
+				int[] start = projectPoint5D(lastLocation, 0, true);
+				int[] end = projectPoint5D(location, 0, true);
+				g.drawLine(start[0], start[1], end[0], end[1]);
+			}
+			lastLocation = location;
+		}
+	}
 	/**
 	 * Do the actual painting. Called by #paintcomponent(Graphics);
 	 */
-	private void paintToBuffer(final Graphics2D g) {
+	private void paintGeometryToBuffer(final Graphics2D g) {
 		// fill background
 		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, getWidth(), getHeight());
@@ -271,5 +364,23 @@ public class ParallelProjectionView extends JPanel {
 			(int) ((c[mAxisVertical.ordinal()] - this.mVerticalMin) * scale + verticalOffset)
 		};
 		return retval;
+	}
+
+	@Override
+	public void contentsChanged(final ListDataEvent aGCodeListEvent) {
+		mPathDoubleBuffer = null;
+		repaint();
+	}
+
+	@Override
+	public void intervalAdded(final ListDataEvent aGCodeListEvent) {
+		mPathDoubleBuffer = null;
+		repaint();
+	}
+
+	@Override
+	public void intervalRemoved(final ListDataEvent aGCodeListEvent) {
+		mPathDoubleBuffer = null;
+		repaint();
 	}
 }

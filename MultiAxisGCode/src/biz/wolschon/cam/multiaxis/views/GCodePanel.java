@@ -27,6 +27,7 @@ import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
 import biz.wolschon.cam.multiaxis.strategy.IProgressListener;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
 import biz.wolschon.cam.multiaxis.tools.Tool;
+import biz.wolschon.cam.multiaxis.views.GCodeModel.GCodeLine;
 
 /**
  * Panel to start G-Code generation and show the generated G-Code.
@@ -37,36 +38,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	 * For serializable.
 	 */
 	private static final long serialVersionUID = -6893843077156524310L;
-	/**
-	 * Helper-class for the ListModel.
-	 * Wraps a line of G-Code to display and the corresponding tool-location.
-	 */
-	private static class GCodeLine {
-		private String mLine;
-		private double[] mToolLocation;
-		private Tool mTool;
-		public Tool getTool() {
-			return mTool;
-		}
-		public GCodeLine (final String aLine, final double[] aToolLocation, final Tool aTool) {
-			this.mLine = aLine;
-			this.mTool = aTool;
-			if (aToolLocation != null) {
-				this.mToolLocation = Arrays.copyOf(aToolLocation, aToolLocation.length);
-			}
-		}
-		/**
-		 * 
-		 * @return May be null in header
-		 */
-		public double[] getToolLocation() {
-			return mToolLocation;
-		}
-		@Override
-		public String toString() {
-			return mLine;
-		}
-	}
+	
 
 	/**
 	 * The 3D model we are working with.	
@@ -74,7 +46,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	private IModel mModel;
 	private JList codeList;
 	private JButton mSaveButton;
-	private DefaultListModel codeListModel;
+	private GCodeModel codeListModel;
 	private StrategyStepsPanel mStrategyPanel;
 	private ModelReviewPanel mReviewTab;
 	private JProgressBar mProgressBar;
@@ -133,7 +105,7 @@ public class GCodePanel extends JPanel implements IProgressListener {
 		});
 		
 		codeList = new JList();
-		codeListModel = new DefaultListModel();
+		codeListModel = new GCodeModel();
 		codeList.setModel(codeListModel);
 		codeList.addListSelectionListener(new ListSelectionListener() {
 			
@@ -154,6 +126,13 @@ public class GCodePanel extends JPanel implements IProgressListener {
 			}
 		});
 		scrollPane.setViewportView(codeList);
+	}
+
+	/**
+	 * @return the codeListModel
+	 */
+	public GCodeModel getCodeListModel() {
+		return codeListModel;
 	}
 
 	protected void onSaveFile() {
