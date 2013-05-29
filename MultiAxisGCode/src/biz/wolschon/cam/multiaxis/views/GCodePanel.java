@@ -44,12 +44,36 @@ public class GCodePanel extends JPanel implements IProgressListener {
 	 * The 3D model we are working with.	
 	 */
 	private IModel mModel;
+	/**
+	 * List to display {@link #codeListModel}.
+	 */
 	private JList codeList;
+	/**
+	 * Button to save the G-Code to a user selected file.
+	 */
 	private JButton mSaveButton;
+	/**
+	 * The generated G-Code.
+	 */
 	private GCodeModel codeListModel;
+	/**
+	 * We need the {@link StrategyStepsPanel} to provide us with the strategy once
+	 * G-Code generation starts.
+	 */
 	private StrategyStepsPanel mStrategyPanel;
+	/**
+	 * We need to inform the {@link ModelReviewPanel} about changes in G-Code
+	 * an about changes in the selected line of G-Code to show the respective tool
+	 * in the respective location for that line.
+	 */
 	private ModelReviewPanel mReviewTab;
+	/**
+	 * Used to show the progress of G-Code generation.
+	 */
 	private JProgressBar mProgressBar;
+	/**
+	 * Used by the {@link #mProgressBar}.
+	 */
 	private static final NumberFormat PERCENT_FORMAT = NumberFormat.getPercentInstance();
 
 	/**
@@ -136,6 +160,9 @@ public class GCodePanel extends JPanel implements IProgressListener {
 		return codeListModel;
 	}
 
+	/**
+	 * The user has pushed {@link #mSaveButton}.
+	 */
 	protected void onSaveFile() {
 		mSaveButton.setEnabled(false);
 		JFileChooser chooser = new JFileChooser();
@@ -184,6 +211,9 @@ public class GCodePanel extends JPanel implements IProgressListener {
 		t.start();
 		
 	}
+	/**
+	 * The user has pushed the button to start G-Code generation.
+	 */
 	protected void onGenerateGCode() {
 		try {
 			// always write to a temporary file
@@ -224,9 +254,13 @@ public class GCodePanel extends JPanel implements IProgressListener {
 		
 	}
 
+	/**
+	 * Progress of the G-Code generation has changed.
+	 * We should update {@link #mProgressBar}.
+	 */
 	@Override
-	public void onProgressChanged(IStrategy aSender, long aProgress,
-			long aMaximum) {
+	public void onProgressChanged(final IStrategy aSender,final long aProgress,
+			final long aMaximum) {
 		if (aMaximum > Integer.MAX_VALUE) {
 
 			mProgressBar.setMaximum(Integer.MAX_VALUE);
