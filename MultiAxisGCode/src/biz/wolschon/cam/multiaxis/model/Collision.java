@@ -9,12 +9,29 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  */
 public class Collision {
 
+	/**
+	 * The triangle to collide with.
+	 */
 	private Triangle triangle;
+	/**
+	 * Collision point in 3D space.
+	 */
 	private Vector3D collisionPoint;
+
+	/**
+	 * Collision point as given by the fist vector of the triangle
+	 */
 	@SuppressWarnings("unused")
 	private double u;
+
+	/**
+	 * Collision point as given by the second vector of the triangle
+	 */
 	@SuppressWarnings("unused")
 	private double v;
+	/**
+	 * Location of each machine axis during the collision.
+	 */
 	private double toolLocation;
 	/**
 	 * 
@@ -22,6 +39,7 @@ public class Collision {
 	 * @param p collision point in 3D space.
 	 * @param u collision point as given by the fist vector of the triangle
 	 * @param v collision point as given by the second vector of the triangle
+	 * @param toolLocation Location of each machine axis during the collision.
 	 */
 	protected Collision(final Triangle triangle, final Vector3D p, final double u, final double v, final double toolLocation) {
 		if (p.isInfinite() || p.isNaN()) {
@@ -33,9 +51,17 @@ public class Collision {
 		this.u = u;
 		this.v = v;
 	}
+	/**
+	 * 
+	 * @return Collision point in 3D space.
+	 */
 	public Vector3D getCollisionPoint() {
 		return collisionPoint;
 	}
+	/**
+	 * 
+	 * @return  The triangle to collide with.
+	 */
 	public Triangle getCollidingPolygon() {
 		return triangle;
 	}
@@ -46,6 +72,9 @@ public class Collision {
 	public double getToolLocation() {
 		return toolLocation;
 	}
+	/**
+	 * @return a string representation fit for debugging.
+	 */
 	@Override
 	public String toString() {
 		return "[colliding with " + triangle + " at " + getCollisionPoint() + " using " + toolLocation + "]";
