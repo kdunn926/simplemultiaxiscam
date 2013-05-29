@@ -203,10 +203,12 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 			if (mPathDoubleBuffer == null ||
 				mPathDoubleBuffer.getWidth() != getWidth() ||
 				mPathDoubleBuffer.getHeight() != getHeight()) {
-				mPathDoubleBuffer = mGraphicsConf.createCompatibleImage(getWidth(), getHeight());
-				paintPathToBuffer((Graphics2D) mPathDoubleBuffer.getGraphics());
+				mPathDoubleBuffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);//mGraphicsConf.createCompatibleImage(getWidth(), getHeight());
+				Graphics2D g2 = (Graphics2D) mPathDoubleBuffer.createGraphics();
+				paintPathToBuffer(g2);
+				g2.dispose();
 			}
-			g.drawImage(mPathDoubleBuffer, 0, 0, Color.BLACK, this);
+			g.drawImage(mPathDoubleBuffer, 0, 0, this);
 			
 		}
 		// draw tool
@@ -234,13 +236,11 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 	}
 
 	private void paintPathToBuffer(final Graphics2D g) {
-		// fill background
-		g.setColor(Color.BLACK);//new Color(0, 0, 0, 255));
-		g.fillRect(0, 0, getWidth(), getHeight());
 		// show tool path
 		GCodeModel model = getGCodeModel();
 		double[] lastLocation = null;
-		g.setColor(Color.LIGHT_GRAY);
+		int alpha = 80;
+		g.setColor(new Color(Color.LIGHT_GRAY.getRed(), Color.LIGHT_GRAY.getBlue(), Color.LIGHT_GRAY.getGreen(), alpha));
 		for (int i = 0; i < model.getSize(); i++) {
 			double[] location = model.getToolLocation(i);
 			if (lastLocation != null) {
