@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.swing.JPanel;
 import javax.swing.event.ListDataEvent;
@@ -92,6 +93,7 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 	private int mSegmentEndY;
 	private int mSegmentStartX;
 	private int mSegmentStartY;
+	private Collection<Axis> mSelectionAxisList;
 	/**
 	 * Used for double buffering.
 	 */
@@ -418,8 +420,10 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 	 * There is at most one listener at any time.
 	 * @param aStrategyCreationPanel
 	 */
-	public void setSegmentSelectionListener(final ISegmentSelectionListener aSegmentSelectionListener) {
+	public void setSegmentSelectionListener(final ISegmentSelectionListener aSegmentSelectionListener,
+		                                	final Collection<Axis> aSelectionAxisList) {
 		this.mSegmentSelectionListener = aSegmentSelectionListener;
+		this.mSelectionAxisList = aSelectionAxisList;
 	}
 
 	public void setSegment(final Limit aSegment) {
@@ -427,7 +431,14 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 	}
 
 	public void setSegmentSelection(boolean aSelect) {
-		this.mSegmentSelecting  = true;
+		if (!aSelect) {
+			this.mSegmentSelecting = false;
+			return;
+		}
+		// check the axes first
+		if (this.mSelectionAxisList.contains(mAxisHorizontal) || this.mSelectionAxisList.contains(mAxisVertical)) {
+			this.mSegmentSelecting = true;
+		}
 	}
 
 	@Override

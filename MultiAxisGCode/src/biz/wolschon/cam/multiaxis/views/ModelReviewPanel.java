@@ -11,6 +11,7 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
 import java.awt.GridLayout;
 import java.io.Serializable;
+import java.util.Collection;
 
 public class ModelReviewPanel extends JPanel {
 
@@ -105,10 +106,11 @@ public class ModelReviewPanel extends JPanel {
 	 * There is at most one listener at any time.
 	 * @param aStrategyCreationPanel
 	 */
-	public void setSegmentSelectionListener(final ISegmentSelectionListener aStrategyCreationPanel) {
-		panelXZ.setSegmentSelectionListener(aStrategyCreationPanel);
-		panelYZ.setSegmentSelectionListener(aStrategyCreationPanel);
-		panelXY.setSegmentSelectionListener(aStrategyCreationPanel);		
+	public void setSegmentSelectionListener(final ISegmentSelectionListener aStrategyCreationPanel,
+        	                                final Collection<Axis> aSelectionAxisList) {
+		panelXZ.setSegmentSelectionListener(aStrategyCreationPanel, aSelectionAxisList);
+		panelYZ.setSegmentSelectionListener(aStrategyCreationPanel, aSelectionAxisList);
+		panelXY.setSegmentSelectionListener(aStrategyCreationPanel, aSelectionAxisList);	
 	}
 
 	public void setSegment(final Limit aSegment) {

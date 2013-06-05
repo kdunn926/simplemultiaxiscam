@@ -5,6 +5,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -118,6 +120,10 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		 * Create the strategy according to the user entered parameters.
 		 */
 		public abstract IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy);
+		/**
+		 * @return The list of axes that can be part of a Segment {@link Limit}.
+		 */
+		public abstract Collection<Axis> getLimitableAxes();
 	};
 
 	/**
@@ -184,6 +190,17 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 				alongXAxis.setMaxLimit(mSegment.getMaximum(secondAxisValue));
 			}
 			return alongXAxis;
+		}
+		/**
+		 * @return The list of axes that can be part of a Segment {@link Limit}.
+		 */
+		public Collection<Axis> getLimitableAxes() {
+			Collection<Axis> retval = new Vector<Axis>();
+			final Axis firstAxisValue = (Axis) firstAxis.getSelectedValue();
+			final Axis secondAxisValue = (Axis) secondAxis.getSelectedValue();
+			retval.add(firstAxisValue);
+			retval.add(secondAxisValue);
+			return retval;
 		}
 	};
 	/**
@@ -259,6 +276,17 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 			}
 			
 			return new ChainStrategy(parent0, parent1);
+		}
+		/**
+		 * @return The list of axes that can be part of a Segment {@link Limit}.
+		 */
+		public Collection<Axis> getLimitableAxes() {
+			Collection<Axis> retval = new Vector<Axis>();
+			final Axis firstAxisValue = (Axis) firstAxis.getSelectedValue();
+			final Axis secondAxisValue = (Axis) secondAxis.getSelectedValue();
+			retval.add(firstAxisValue);
+			retval.add(secondAxisValue);
+			return retval;
 		}
 	};
 	private JPanel mainPanel;
@@ -420,8 +448,9 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	}
 
 	protected void onSelectSegment() {
+		Collection<Axis> axes = mStrategyPanel.getLimitableAxes();
 		//TODO: collect the list of axis actually used to limit the selection to these axis
-		mReviewTab.setSegmentSelectionListener(this);
+		mReviewTab.setSegmentSelectionListener(this, axes );
 		mReviewTab.setSegmentSelection(true);
 	}
 
