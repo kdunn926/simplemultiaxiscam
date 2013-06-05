@@ -479,7 +479,7 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 			double minFirstAxis = ((this.mSegmentStartX - horizontalOffset) / scale)  + this.mHorizontalMin;
 			double maxFirstAxis = ((this.mSegmentEndX - horizontalOffset) / scale)  + this.mHorizontalMin;
 			double minSecondAxis = ((this.mSegmentStartY - verticalOffset) / scale)  + this.mVerticalMin;
-			double maxSecondAxis = ((this.mSegmentEndY - minSecondAxis) / scale)  + this.mVerticalMin;
+			double maxSecondAxis = ((this.mSegmentEndY - verticalOffset) / scale)  + this.mVerticalMin;
 			
 			this.mSegment.addAxis(minFirstAxis, maxFirstAxis, mAxisHorizontal);
 			this.mSegment.addAxis(minSecondAxis, maxSecondAxis, mAxisVertical);

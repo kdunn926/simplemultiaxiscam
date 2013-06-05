@@ -43,7 +43,7 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	private long mProgressMax;
 	private int mProgress;
 	private IProgressListener mProgressListener;
-	private double mMinLimit = Double.MIN_NORMAL;
+	private double mMinLimit;
 	private double mMaxLimit;
 	/**
 	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
@@ -55,6 +55,8 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 		this.mAxis = aAxis;
 		this.mStep = aStep;
 		this.mNextStrategy = aChild;
+		mMinLimit = mModel.getMin(mAxis);
+		mMaxLimit = mModel.getMax(mAxis);
 	}
 
 	public void setDirection(final Direction aDirection) {
@@ -78,12 +80,6 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	@Override
 	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
 		mMeanderTemp = !mMeanderTemp;
-		if (mMinLimit < mModel.getMin(mAxis)) { 
-			mMinLimit = mModel.getMin(mAxis);
-		}
-		if (mMaxLimit < mModel.getMax(mAxis)) { 
-			mMaxLimit = mModel.getMax(mAxis);
-		}
 		if (mDirection != Direction.Meander) {
 			// raise tool and move it to the start position without colliding with the object
 			double[] moveTo = Arrays.copyOf(aStartLocation, aStartLocation.length);
@@ -132,7 +128,7 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	/**
 	 * @param aMinLimit the minLimit to set
 	 */
-	public void setMinLimit(double aMinLimit) {
+	public void setMinLimit(final double aMinLimit) {
 		mMinLimit = aMinLimit;
 	}
 
@@ -146,7 +142,7 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	/**
 	 * @param aMaxLimit the maxLimit to set
 	 */
-	public void setMaxLimit(double aMaxLimit) {
+	public void setMaxLimit(final double aMaxLimit) {
 		mMaxLimit = aMaxLimit;
 	}
 
