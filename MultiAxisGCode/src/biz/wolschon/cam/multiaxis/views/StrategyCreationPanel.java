@@ -7,7 +7,9 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -35,7 +37,7 @@ import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 /**
  * Panel to enter all tool and strategy information.
  */
-public class StrategyCreationPanel extends JPanel {
+public class StrategyCreationPanel extends JPanel implements ISegmentSelectionListener {
 
 	/**
 	 * For Serializable.
@@ -65,6 +67,11 @@ public class StrategyCreationPanel extends JPanel {
 	 * Uppon selecting the strategy #onStrategySelected() takes care of displaying the UI for it's parameters
 	 */
 	private JList mStrategies;
+
+	/**
+	 * Limit the range of the current strategy.
+	 */
+	private Limit mSegment;
 	/**
 	 * Currently selected tool.
 	 */
@@ -161,12 +168,21 @@ public class StrategyCreationPanel extends JPanel {
 		public IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy) {
 			
 			// 2. every step of 1., do around the A axis in 10� steps
-			LinearStrategy aroundAAxis = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
+			Axis firstAxisValue = (Axis) firstAxis.getSelectedValue();
+			LinearStrategy aroundAAxis = new LinearStrategy(aModel, firstAxisValue, Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
+			if (mSegment != null && mSegment.isAxisLimited(firstAxisValue)) {
+				aroundAAxis.setMinLimit(mSegment.getMinimum(firstAxisValue));
+				aroundAAxis.setMaxLimit(mSegment.getMaximum(firstAxisValue));
+			}
 			aroundAAxis.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
 			// 1. start by moving along the Y axis in 1.1mm steps
-			LinearStrategy alongXAxis = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aroundAAxis);
-
+			Axis secondAxisValue = (Axis) secondAxis.getSelectedValue();
+			LinearStrategy alongXAxis = new LinearStrategy(aModel,secondAxisValue, Double.parseDouble(secondAxisStep.getText()), aroundAAxis);
+			if (mSegment != null && mSegment.isAxisLimited(secondAxisValue)) {
+				alongXAxis.setMinLimit(mSegment.getMinimum(secondAxisValue));
+				alongXAxis.setMaxLimit(mSegment.getMaximum(secondAxisValue));
+			}
 			return alongXAxis;
 		}
 	};
@@ -219,14 +235,29 @@ public class StrategyCreationPanel extends JPanel {
 		}
 		public IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy) {
 			
-			LinearStrategy child0 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
-			LinearStrategy parent0 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), child0);
+			final Axis firstAxisValue = (Axis) firstAxis.getSelectedValue();
+			final Axis secondAxisValue = (Axis) secondAxis.getSelectedValue();
+			LinearStrategy child0 = new LinearStrategy(aModel, firstAxisValue, Double.parseDouble(firstAxisStep.getText()), aNextStrategy);
+			LinearStrategy parent0 = new LinearStrategy(aModel,secondAxisValue, Double.parseDouble(secondAxisStep.getText()), child0);
 			child0.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
-			LinearStrategy child1 = new LinearStrategy(aModel,(Axis) secondAxis.getSelectedValue(), Double.parseDouble(secondAxisStep.getText()), aNextStrategy);
-			LinearStrategy parent1 = new LinearStrategy(aModel, (Axis) firstAxis.getSelectedValue(), Double.parseDouble(firstAxisStep.getText()), child1);
+			LinearStrategy child1 = new LinearStrategy(aModel,secondAxisValue, Double.parseDouble(secondAxisStep.getText()), aNextStrategy);
+			LinearStrategy parent1 = new LinearStrategy(aModel, firstAxisValue, Double.parseDouble(firstAxisStep.getText()), child1);
 			child1.setDirection((LinearStrategy.Direction) cuttingDirection.getSelectedValue());
 
+			if (mSegment != null && mSegment.isAxisLimited(firstAxisValue)) {
+				child0.setMinLimit(mSegment.getMinimum(firstAxisValue));
+				child0.setMaxLimit(mSegment.getMaximum(firstAxisValue));
+				parent1.setMinLimit(mSegment.getMinimum(firstAxisValue));
+				parent1.setMaxLimit(mSegment.getMaximum(firstAxisValue));
+			}
+			if (mSegment != null && mSegment.isAxisLimited(secondAxisValue)) {
+				parent0.setMinLimit(mSegment.getMinimum(secondAxisValue));
+				parent0.setMaxLimit(mSegment.getMaximum(secondAxisValue));
+				child1.setMinLimit(mSegment.getMinimum(secondAxisValue));
+				child1.setMaxLimit(mSegment.getMaximum(secondAxisValue));
+			}
+			
 			return new ChainStrategy(parent0, parent1);
 		}
 	};
@@ -235,9 +266,20 @@ public class StrategyCreationPanel extends JPanel {
 	 * Create the panel.
 	 */
 	private ToolRepository mToolRepository;
-	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository, final IModel aModel) {
+	/**
+	 * Panel with the widgets to select a segment.
+	 * @see #mSegment.
+	 */
+	private JPanel mSegmentPanel;
+	/**
+	 * Used to implement selection of segments.
+	 */
+	private ModelReviewPanel mReviewTab;
+	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository, final IModel aModel, final ModelReviewPanel aReviewTab) {
 		this.mLabel = aLabel;
 		this.mModel = aModel;
+		this.mReviewTab = aReviewTab;
+		this.mReviewTab.setSegment(mSegment);
 		this.mToolRepository = aToolRepository;
 		setLayout(new BorderLayout());
 		mainPanel = new JPanel();
@@ -300,7 +342,7 @@ public class StrategyCreationPanel extends JPanel {
 		mTools.setVisibleRowCount(1);
 
 		mainPanel.add(new JLabel("[---] tool RPM"), null);
-		mainPanel.add(new JLabel("[use model size] segment"), null);
+		mainPanel.add(getSegmentPanel(), null);
 
 		//-------------- strategy
 		//TODO: add waterline strategy
@@ -342,6 +384,52 @@ public class StrategyCreationPanel extends JPanel {
 		
 	}
 
+	/**
+	 * @return
+	 */
+	protected JComponent getSegmentPanel() {
+		if (this.mSegmentPanel == null) {
+			this.mSegmentPanel = new JPanel();
+			this.mSegmentPanel.setLayout(new BorderLayout(0, 0));
+			final JCheckBox useSegmentCheckbox = new JCheckBox("limit to segment");
+			this.mSegmentPanel.add(useSegmentCheckbox, BorderLayout.WEST);
+			final JButton segmentSelectionButton = new JButton("select");
+			this.mSegmentPanel.add(segmentSelectionButton, BorderLayout.EAST);
+
+			segmentSelectionButton.setEnabled(useSegmentCheckbox.isSelected());
+			segmentSelectionButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent aE) {
+					onSelectSegment();
+					
+				}
+			});
+			useSegmentCheckbox.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent aArg0) {
+					segmentSelectionButton.setEnabled(useSegmentCheckbox.isSelected());
+					if (StrategyCreationPanel.this.mSegment == null) {
+						onSelectSegment();
+					}
+				}
+			});
+		}
+		return this.mSegmentPanel;
+	}
+
+	protected void onSelectSegment() {
+		//TODO: collect the list of axis actually used to limit the selection to these axis
+		mReviewTab.setSegmentSelectionListener(this);
+		mReviewTab.setSegmentSelection(true);
+	}
+
+	@Override
+	public void onSegmentSelected(final Limit aSegment) {
+		this.mSegment = aSegment;
+		this.mReviewTab.setSegment(aSegment);
+	}
 	/**
 	 * The user has selected a new strategy, show it's UI, so the user can select parameters.
 	 */

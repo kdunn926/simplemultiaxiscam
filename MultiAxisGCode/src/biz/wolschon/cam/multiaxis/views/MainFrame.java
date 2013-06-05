@@ -94,14 +94,12 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		mLeftPane.add(new JScrollPane(getStrategyStepsList(aModel)),  BorderLayout.NORTH);
 		contentPane.add(mLeftPane, JSplitPane.LEFT);
 
-		mReviewTab = new ModelReviewPanel(aModel);
-		mReviewTab.setPreferredSize(new Dimension(800, 600));
-		contentPane2.add(mReviewTab, JSplitPane.TOP);
+		contentPane2.add(getModelReviewTab(aModel), JSplitPane.TOP);
 
-		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools, aModel));
+		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools, aModel, getModelReviewTab(aModel)));
 		mStrategySteps.addStrategyStep(mCurrentStrategyTab);
 
-		mGCodeTab = new GCodePanel(aModel, mReviewTab, mStrategySteps);
+		mGCodeTab = new GCodePanel(aModel, getModelReviewTab(aModel), mStrategySteps);
 		contentPane2.add(mGCodeTab, JSplitPane.BOTTOM);
 		mReviewTab.setGCodeModel(mGCodeTab.getCodeListModel());
 		
@@ -110,9 +108,21 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		contentPane.setDividerLocation(0.3);
 	}
 
+	/**
+	 * @param aModel
+	 * @return 
+	 */
+	protected ModelReviewPanel getModelReviewTab(final IModel aModel) {
+		if (mReviewTab == null) {
+			mReviewTab = new ModelReviewPanel(aModel);
+			mReviewTab.setPreferredSize(new Dimension(800, 600));
+		}
+		return mReviewTab;
+	}
+
 	private JComponent getStrategyStepsList(final IModel aModel) {
 		if (mStrategySteps == null) {
-			mStrategySteps = new StrategyStepsPanel(mTools, aModel);
+			mStrategySteps = new StrategyStepsPanel(mTools, aModel, getModelReviewTab(aModel));
 			mStrategySteps.setListener(this);
 		}
     	return mStrategySteps;

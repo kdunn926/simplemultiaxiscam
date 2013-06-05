@@ -43,6 +43,8 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	private long mProgressMax;
 	private int mProgress;
 	private IProgressListener mProgressListener;
+	private double mMinLimit = Double.MIN_NORMAL;
+	private double mMaxLimit;
 	/**
 	 * @param aAxis the axis we move along in this strategy. Any value set by a previous strategy is overwritten.
 	 * @param aStep The increment (in the current unit, e.g. "mm") we use to move along aAxis.
@@ -76,20 +78,26 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 	@Override
 	public void runStrategy(final double aStartLocation[], final boolean isCutting) throws IOException {
 		mMeanderTemp = !mMeanderTemp;
+		if (mMinLimit < mModel.getMin(mAxis)) { 
+			mMinLimit = mModel.getMin(mAxis);
+		}
+		if (mMaxLimit < mModel.getMax(mAxis)) { 
+			mMaxLimit = mModel.getMax(mAxis);
+		}
 		if (mDirection != Direction.Meander) {
 			// raise tool and move it to the start position without colliding with the object
 			double[] moveTo = Arrays.copyOf(aStartLocation, aStartLocation.length);
 			if (mDirection == Direction.Conventional) {
-				moveTo[mAxis.ordinal()] = mModel.getMin(mAxis);
+				moveTo[mAxis.ordinal()] = mMinLimit;
 			} else {
-				moveTo[mAxis.ordinal()] = mModel.getMax(mAxis);
+				moveTo[mAxis.ordinal()] = mMaxLimit;
 			}
 			getNextStrategy().runStrategy(moveTo, false);
 		}
 		double[] currentLocation = Arrays.copyOf(aStartLocation, aStartLocation.length);
-		double start = mModel.getMin(mAxis);
+		double start = mMinLimit;
 		double current = start;
-		double max = mModel.getMax(mAxis);
+		double max = mMaxLimit;
 		this.mProgressMax = (long) ((max - start) / mStep);
 		this.mProgress    = 0;
 		while (current < max) {
@@ -112,6 +120,34 @@ public class LinearStrategy implements IStrategy, IProgressListener {
 			current += mStep;
 			this.mProgress++;
 		}
+	}
+
+	/**
+	 * @return the minLimit
+	 */
+	public double getMinLimit() {
+		return mMinLimit;
+	}
+
+	/**
+	 * @param aMinLimit the minLimit to set
+	 */
+	public void setMinLimit(double aMinLimit) {
+		mMinLimit = aMinLimit;
+	}
+
+	/**
+	 * @return the maxLimit
+	 */
+	public double getMaxLimit() {
+		return mMaxLimit;
+	}
+
+	/**
+	 * @param aMaxLimit the maxLimit to set
+	 */
+	public void setMaxLimit(double aMaxLimit) {
+		mMaxLimit = aMaxLimit;
 	}
 
 	@Override

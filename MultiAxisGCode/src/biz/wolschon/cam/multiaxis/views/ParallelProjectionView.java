@@ -15,6 +15,9 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
 import java.io.Serializable;
@@ -29,7 +32,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 /**
  * Panel that shows a parallel projection of a model and a tool.
  */
-public class ParallelProjectionView extends JPanel implements ListDataListener {
+public class ParallelProjectionView extends JPanel implements ListDataListener, MouseListener, MouseMotionListener {
 	/**
 	 * For {@link Serializable}.
 	 */
@@ -79,6 +82,16 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 	 */
 	private boolean mShowPath = false;
 	private BufferedImage mPathDoubleBuffer;
+	private Limit mSegment;
+	private ISegmentSelectionListener mSegmentSelectionListener;
+	/**
+	 * True if the user is currently selecting a segment.
+	 */
+	private boolean mSegmentSelecting = false;
+	private int mSegmentEndX;
+	private int mSegmentEndY;
+	private int mSegmentStartX;
+	private int mSegmentStartY;
 	/**
 	 * Used for double buffering.
 	 */
@@ -96,6 +109,8 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 		setHorizontalAxis(Axis.X);
 		setMinimumSize(new Dimension(100, 100));
 		setPreferredSize(new Dimension(500, 500));
+		addMouseListener(this);
+		addMouseMotionListener(this);
 	}
 
 	public void setToolLocation(final double[] aToolLocation) {
@@ -233,6 +248,18 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 				}
 			}
 		}
+
+		// draw current segment
+		if (this.mSegment != null && this.mSegment.isAxisLimited(mAxisHorizontal) && this.mSegment.isAxisLimited(mAxisVertical)) {
+			//TODO
+			//TODO rotational axis too
+		}
+
+		// draw segment selection is progress
+		if (mSegmentSelecting) {
+			g.setColor(Color.BLACK);
+			g.drawRect(mSegmentStartX, mSegmentStartY, mSegmentEndX - mSegmentStartX, mSegmentEndY - mSegmentStartY);
+		}
 	}
 
 	/**
@@ -278,9 +305,9 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 			// project the 3 vertices of the triangle onto the screen
 			// the model always has A=0 and B=0 coordinates
 			Triangle triangle = mModel.getTriangle(i);
-			int[] project0 = projectPoint3D(triangle.getP1(), scale);
-			int[] project1 = projectPoint3D(triangle.getP2(), scale);
-			int[] project2 = projectPoint3D(triangle.getP3(), scale);
+			int[] project0 = projectPoint3D(triangle.getP1());
+			int[] project1 = projectPoint3D(triangle.getP2());
+			int[] project2 = projectPoint3D(triangle.getP3());
 
 			//TODO: allow solid in addition to wireframe
 			g.drawLine(project0[0], project0[1], project1[0], project1[1]);
@@ -310,8 +337,8 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 		g.setColor(Color.RED);
 		Vector3D leftA = new Vector3D(mModel.getMinX(), mModel.getCenterY(), mModel.getCenterZ());
 		Vector3D rightA = new Vector3D(mModel.getMaxX(), mModel.getCenterY(), mModel.getCenterZ());
-		int[] project0 = projectPoint3D(leftA, scale);
-		int[] project1 = projectPoint3D(rightA, scale);
+		int[] project0 = projectPoint3D(leftA);
+		int[] project1 = projectPoint3D(rightA);
 		g.drawLine(project0[0],  project0[1],  project1[0],  project1[1]);
 		g.drawChars(Axis.A.toString().toCharArray(), 0, 1, project0[0], project0[1] - 10);
 		
@@ -320,11 +347,11 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 	/**
 	 * Do a parallel projection of the given X,Y,Z coordinate. Ignore Axis.A and Axis.B.
 	 */
-	protected int[] projectPoint3D(final Vector3D aVector3d, final double aScale) {
+	protected int[] projectPoint3D(final Vector3D aVector3d) {
 		//TODO: avoid object creation
 		int[] retval = new int[] {
-			(int) ((mAxisHorizontal.get(aVector3d) - this.mHorizontalMin) * aScale + horizontalOffset),
-			(int) ((mAxisVertical.get(aVector3d) - this.mVerticalMin) * aScale + verticalOffset)
+			(int) ((mAxisHorizontal.get(aVector3d) - this.mHorizontalMin) * scale + horizontalOffset),
+			(int) ((mAxisVertical.get(aVector3d) - this.mVerticalMin) * scale + verticalOffset)
 		};
 		return retval;
 	}
@@ -385,5 +412,81 @@ public class ParallelProjectionView extends JPanel implements ListDataListener {
 	public void intervalRemoved(final ListDataEvent aGCodeListEvent) {
 		mPathDoubleBuffer = null;
 		repaint();
+	}
+
+	/**
+	 * There is at most one listener at any time.
+	 * @param aStrategyCreationPanel
+	 */
+	public void setSegmentSelectionListener(final ISegmentSelectionListener aSegmentSelectionListener) {
+		this.mSegmentSelectionListener = aSegmentSelectionListener;
+	}
+
+	public void setSegment(final Limit aSegment) {
+		this.mSegment = aSegment;
+	}
+
+	public void setSegmentSelection(boolean aSelect) {
+		this.mSegmentSelecting  = true;
+	}
+
+	@Override
+	public void mouseDragged(final MouseEvent anEvent) {
+		if (mSegmentSelecting) {
+			this.mSegmentEndX = anEvent.getX();
+			this.mSegmentEndY = anEvent.getY();
+			repaint();
+		}
+	}
+
+	@Override
+	public void mouseMoved(final MouseEvent aArg0) {
+		// ignored
+	}
+
+	@Override
+	public void mouseClicked(final MouseEvent aArg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent aArg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent aArg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent anEvent) {
+		if (mSegmentSelecting) {
+			this.mSegmentStartX = anEvent.getX();
+			this.mSegmentStartY = anEvent.getY();
+		}
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent aArg0) {
+		if (mSegmentSelecting) {
+			this.mSegment = new Limit();
+
+			double minFirstAxis = ((this.mSegmentStartX - horizontalOffset) / scale)  + this.mHorizontalMin;
+			double maxFirstAxis = ((this.mSegmentEndX - horizontalOffset) / scale)  + this.mHorizontalMin;
+			double minSecondAxis = ((this.mSegmentStartY - verticalOffset) / scale)  + this.mVerticalMin;
+			double maxSecondAxis = ((this.mSegmentEndY - minSecondAxis) / scale)  + this.mVerticalMin;
+			
+			this.mSegment.addAxis(minFirstAxis, maxFirstAxis, mAxisHorizontal);
+			this.mSegment.addAxis(minSecondAxis, maxSecondAxis, mAxisVertical);
+			if (mSegmentSelectionListener != null) {
+				this.mSegmentSelectionListener.onSegmentSelected(mSegment);
+			}
+			this.mSegmentSelecting = false;
+		}
 	}
 }

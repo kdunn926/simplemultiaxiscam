@@ -54,6 +54,8 @@ public class StrategyStepsPanel extends JPanel {
 	private DefaultListModel mStrategyStepsModel;
 	private JButton mAddButton;
 
+	private ModelReviewPanel mReviewPanel;
+
 	public StrategyCreationPanel getCurrentStep() {
 		return mCurrentStep;
 	}
@@ -65,9 +67,10 @@ public class StrategyStepsPanel extends JPanel {
 		}
 	}
 
-	public StrategyStepsPanel(final ToolRepository aToolsRepository, final IModel aModel) {
+	public StrategyStepsPanel(final ToolRepository aToolsRepository, final IModel aModel, final ModelReviewPanel aReviewPanel) {
 		this.mToolsRepository = aToolsRepository;
 		this.mModel = aModel;
+		this.mReviewPanel = aReviewPanel;
 		setLayout(new BorderLayout());
 		mStrategySteps = new JList();
 		mStrategyStepsModel = new DefaultListModel();
@@ -134,7 +137,7 @@ public class StrategyStepsPanel extends JPanel {
 
 								@Override
 				public void actionPerformed(ActionEvent aIgnored) {
-					addStrategyStep(new StrategyCreationPanel("new", mToolsRepository, mModel));
+					addStrategyStep(new StrategyCreationPanel("new", mToolsRepository, mModel, mReviewPanel));
 				}
 			});
 		}

@@ -100,4 +100,26 @@ public class ModelReviewPanel extends JPanel {
 		panelYZ.setGCodeModel(aGCodeModel);
 		panelXY.setGCodeModel(aGCodeModel);
 	}
+
+	/**
+	 * There is at most one listener at any time.
+	 * @param aStrategyCreationPanel
+	 */
+	public void setSegmentSelectionListener(final ISegmentSelectionListener aStrategyCreationPanel) {
+		panelXZ.setSegmentSelectionListener(aStrategyCreationPanel);
+		panelYZ.setSegmentSelectionListener(aStrategyCreationPanel);
+		panelXY.setSegmentSelectionListener(aStrategyCreationPanel);		
+	}
+
+	public void setSegment(final Limit aSegment) {
+		panelXZ.setSegment(aSegment);
+		panelYZ.setSegment(aSegment);
+		panelXY.setSegment(aSegment);
+	}
+
+	public void setSegmentSelection(boolean aSelect) {
+		panelXZ.setSegmentSelection(aSelect);
+		panelYZ.setSegmentSelection(aSelect);
+		panelXY.setSegmentSelection(aSelect);
+	}
 }
