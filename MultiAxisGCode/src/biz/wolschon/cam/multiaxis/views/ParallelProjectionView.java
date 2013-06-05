@@ -29,6 +29,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 /**
  * Panel that shows a parallel projection of a model and a tool.
@@ -94,6 +95,10 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 	private int mSegmentStartX;
 	private int mSegmentStartY;
 	private Collection<Axis> mSelectionAxisList;
+	/**
+	 * One of the axis in mSelectionAxisList is the rotation axis around the plane we are showing.
+	 */
+	private Axis mSegmentSelectingRotation;
 	/**
 	 * Used for double buffering.
 	 */
@@ -260,7 +265,32 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 		// draw segment selection is progress
 		if (mSegmentSelecting) {
 			g.setColor(Color.BLACK);
-			g.drawRect(mSegmentStartX, mSegmentStartY, mSegmentEndX - mSegmentStartX, mSegmentEndY - mSegmentStartY);
+			if (mSegmentSelectingRotation != null) {
+				//TODO: calculate start+end angle from mSegmentStartX/Y and mSegmentEndX/Y
+				Vector3D start = new Vector3D(mSegmentStartX - getWidth()/2, mSegmentStartY - getHeight()/2, 0);
+				Vector3D end = new Vector3D(mSegmentEndX - getWidth()/2, mSegmentEndY - getHeight()/2, 0);
+				//Vector3D up = new Vector3D(1, 0, 0);
+				Vector3D down = new Vector3D(1, -1, 0);
+				int startDegrees = ((int)Math.toDegrees(Vector3D.angle(down,  start))) + 60;
+				if (startDegrees > 360) {
+					startDegrees -= 360;
+				}
+				if (startDegrees < 0) {
+					startDegrees += 360;
+				}
+				int degrees = 360 - (int)Math.toDegrees(Math.atan2(end.getY(), end.getX()) - Math.atan2(start.getY(), start.getX()));//(int)Math.toDegrees(Vector3D.angle(start,  end));
+				System.out.println("angle=" + degrees);
+				if (degrees < 0) {
+					degrees += 360;
+				}
+				if (degrees > 360) {
+					degrees -= 360;
+				}
+				
+				g.drawArc(getWidth() / 4, getHeight() / 4, getWidth() / 2, getHeight()/2, startDegrees, degrees);
+			} else {
+				g.drawRect(mSegmentStartX, mSegmentStartY, mSegmentEndX - mSegmentStartX, mSegmentEndY - mSegmentStartY);
+			}
 		}
 	}
 
@@ -438,6 +468,20 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 		// check the axes first
 		if (this.mSelectionAxisList.contains(mAxisHorizontal) || this.mSelectionAxisList.contains(mAxisVertical)) {
 			this.mSegmentSelecting = true;
+			this.mSegmentSelectingRotation = null;
+			
+		} else {
+			for (Axis selectionAxis : this.mSelectionAxisList) {
+				if (!selectionAxis.isLinearAxis()) {
+					Axis[] rotationPlane = selectionAxis.getRotationPlane();
+					if (rotationPlane[0] == mAxisHorizontal || rotationPlane[1] == mAxisHorizontal)
+						if (rotationPlane[0] == mAxisVertical || rotationPlane[1] == mAxisVertical) {
+							this.mSegmentSelectingRotation = selectionAxis;
+							this.mSegmentSelecting = true;
+							break;
+						}
+				}
+			}
 		}
 	}
 
@@ -484,8 +528,37 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 
 	@Override
 	public void mouseReleased(MouseEvent aArg0) {
-		if (mSegmentSelecting) {
-			this.mSegment = new Limit();
+		if (mSegmentSelecting && mSegmentSelectingRotation != null) {
+			if (this.mSegment == null) {
+				this.mSegment = new Limit();
+			}
+			Vector3D start = new Vector3D(mSegmentStartX - getWidth()/2, mSegmentStartY - getHeight()/2, 0);
+			Vector3D end = new Vector3D(mSegmentEndX - getWidth()/2, mSegmentEndY - getHeight()/2, 0);
+			//Vector3D up = new Vector3D(1, 0, 0);
+			Vector3D down = new Vector3D(1, -1, 0);
+			int startDegrees = ((int)Math.toDegrees(Vector3D.angle(down,  start))) + 60;
+			if (startDegrees > 360) {
+				startDegrees -= 360;
+			}
+			if (startDegrees < 0) {
+				startDegrees += 360;
+			}
+			int endDegrees = ((int)Math.toDegrees(Vector3D.angle(down,  end))) + 60;
+			if (endDegrees > 360) {
+				endDegrees -= 360;
+			}
+			if (endDegrees < 0) {
+				endDegrees += 360;
+			}
+			this.mSegment.addAxis(startDegrees, endDegrees, mSegmentSelectingRotation);
+			if (mSegmentSelectionListener != null) {
+				this.mSegmentSelectionListener.onSegmentSelected(mSegment);
+			}
+			this.mSegmentSelecting = false;
+		} else if (mSegmentSelecting) {
+			if (this.mSegment == null) {
+				this.mSegment = new Limit();
+			}
 
 			double minFirstAxis = ((this.mSegmentStartX - horizontalOffset) / scale)  + this.mHorizontalMin;
 			double maxFirstAxis = ((this.mSegmentEndX - horizontalOffset) / scale)  + this.mHorizontalMin;

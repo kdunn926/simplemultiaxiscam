@@ -448,9 +448,10 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	}
 
 	protected void onSelectSegment() {
+		//collect the list of axis actually used to limit the selection to these axis
 		Collection<Axis> axes = mStrategyPanel.getLimitableAxes();
-		//TODO: collect the list of axis actually used to limit the selection to these axis
 		mReviewTab.setSegmentSelectionListener(this, axes );
+		mReviewTab.setSegment(new Limit()); // clear first
 		mReviewTab.setSegmentSelection(true);
 	}
 
