@@ -89,6 +89,11 @@ public class GCodeModel extends javax.swing.AbstractListModel {
 	 */
 	@Override
 	public GCodeLine getElementAt(int anIndex) {
+		if (anIndex < 0) {
+			return null;
+		}if (mGCodeLines.size() >= anIndex) {
+			return null;
+		}
 		return mGCodeLines.get(anIndex);
 	}
 	/**
