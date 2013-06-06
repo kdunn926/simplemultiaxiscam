@@ -31,8 +31,10 @@ import biz.wolschon.cam.multiaxis.strategy.ChainStrategy;
 import biz.wolschon.cam.multiaxis.strategy.FollowSurfaceNormalCutStrategy;
 import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
+import biz.wolschon.cam.multiaxis.strategy.LayerStrategy;
 import biz.wolschon.cam.multiaxis.strategy.LinearStrategy;
 import biz.wolschon.cam.multiaxis.strategy.StraightZCutStrategy;
+import biz.wolschon.cam.multiaxis.strategy.ZLimitingStrategy;
 import biz.wolschon.cam.multiaxis.tools.Tool;
 import biz.wolschon.cam.multiaxis.tools.ToolRepository;
 import biz.wolschon.cam.multiaxis.trigonometry.Axis;
@@ -359,14 +361,13 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 
 			mRoughing = new JCheckBox("roughing");
 			mRoughing.setSelected(false);
-			mRoughing.setEnabled(false); //TODO: Roughing not yet implemented
 			mStrategyModificationTab.add(mRoughing, null);
 			mRoughing.addActionListener(new ActionListener() {
 				
 				@Override
 				public void actionPerformed(ActionEvent aArg0) {
 					mLayerHeight.setEnabled(mRoughing.isSelected());
-					mSkinThickness.setEnabled(mRoughing.isSelected());
+					//TODO: net yet implemented mSkinThickness.setEnabled(mRoughing.isSelected());
 				}
 			});
 	
@@ -562,6 +563,12 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		anOutputStrategy.setFeedRate(feedRateValue);
 
 		IStrategy cutStrategy = anOutputStrategy;
+		ZLimitingStrategy zLimitingStep = null;
+		if (mRoughing.isSelected()) {
+			zLimitingStep = new ZLimitingStrategy(cutStrategy);
+			cutStrategy = zLimitingStep;
+		}
+
 		double freeMovementHeightValue = ((SpinnerNumberModel)freeMovementHeight.getModel()).getNumber().doubleValue();
 
 		if (mReal5Axis.isSelected()) {
@@ -577,7 +584,14 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		}
 
 		// 1. and 2. move along first and second axis
-		return mStrategyPanel.getStrategy(aModel, cutStrategy );
+		IStrategy strategy = mStrategyPanel.getStrategy(aModel, cutStrategy );
+
+		if (mRoughing.isSelected()) {
+			double aLayerHeightValue = ((SpinnerNumberModel)mLayerHeight.getModel()).getNumber().doubleValue();
+
+			strategy = new LayerStrategy(aLayerHeightValue, zLimitingStep, strategy, mModel.getMaxZ());
+		}
+		return strategy;
 	}
 
 	@Override
