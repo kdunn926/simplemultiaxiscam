@@ -3,7 +3,6 @@ package biz.wolschon.cam.multiaxis.strategy;
 import java.io.IOException;
 import java.util.Arrays;
 
-import biz.wolschon.cam.multiaxis.trigonometry.Axis;
 
 /**
  * @author marcuswolschon

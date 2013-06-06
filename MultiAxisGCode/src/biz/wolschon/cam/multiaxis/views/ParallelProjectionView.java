@@ -29,7 +29,6 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 /**
  * Panel that shows a parallel projection of a model and a tool.
@@ -306,7 +305,7 @@ public class ParallelProjectionView extends JPanel implements ListDataListener, 
 		g.setColor(new Color(Color.LIGHT_GRAY.getRed(), Color.LIGHT_GRAY.getBlue(), Color.LIGHT_GRAY.getGreen(), alpha));
 		for (int i = 0; i < model.getSize(); i++) {
 			double[] location = model.getToolLocation(i);
-			if (lastLocation != null) {
+			if (lastLocation != null && location != null) {
 				int[] start = projectPoint5D(lastLocation, 0, true);
 				int[] end = projectPoint5D(location, 0, true);
 				g.drawLine(start[0], start[1], end[0], end[1]);

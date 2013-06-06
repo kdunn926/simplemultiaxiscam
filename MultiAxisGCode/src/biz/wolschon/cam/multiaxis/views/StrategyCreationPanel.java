@@ -48,10 +48,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 * For Serializable.
 	 */
 	private static final long serialVersionUID = 8504617103443377316L;
-	/**
-	 * Parent for the parameter settings for tools and strategy.
-	 */
-	private JTabbedPane mParameterSettings;
+
 	/**
 	 * Checkbox to add a strategy to follow the surface normal on the A axis to the chain of command.
 	 */
@@ -61,8 +58,20 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 * Checkbox to add a strategy to follow the surface normal on the B axis to the chain of command.
 	 */
 	private JCheckBox mReal5Axis;
-	private JSpinner freeMovementHeight = new JSpinner();
-	private JSpinner feedRate = new JSpinner();
+
+	/**
+	 * Input widget for the safe height above the object.
+	 */
+	private JSpinner mFreeMovementHeight = new JSpinner();
+
+	/**
+	 * Input widget for the feed rate.
+	 */
+	private JSpinner feedRateMoving = new JSpinner();
+	/**
+	 * Input widget for the feed rate.
+	 */
+	private JSpinner feedRateCutting = new JSpinner();
 	/**
 	 * List to select a tool from.<br/>
 	 * Uppon selecting the tool #onToolSelected() takes care of displaying the UI for it's parameters
@@ -245,7 +254,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 			panel.add(new JLabel("cutting direction"), null);
 			panel.add(new JScrollPane(cuttingDirection));
 			 
-			panel.add(freeMovementHeight);
+			panel.add(mFreeMovementHeight);
 
 			firstAxis.setSelectedValue(Axis.X, true);
 			secondAxis.setSelectedValue(Axis.A, true);
@@ -367,7 +376,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 				@Override
 				public void actionPerformed(ActionEvent aArg0) {
 					mLayerHeight.setEnabled(mRoughing.isSelected());
-					//TODO: net yet implemented mSkinThickness.setEnabled(mRoughing.isSelected());
+					mSkinThickness.setEnabled(mRoughing.isSelected());
 				}
 			});
 	
@@ -387,7 +396,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 				JPanel temp = new JPanel(new BorderLayout());
 				temp.add(new JLabel("skin thickness"), BorderLayout.EAST);
 				temp.add(mSkinThickness, BorderLayout.CENTER);
-				SpinnerNumberModel snmodel = new SpinnerNumberModel(0.4d, 0.0001, mModel.getMaxZ() - mModel.getMinZ(), 0.05); 
+				SpinnerNumberModel snmodel = new SpinnerNumberModel(0.4d, 0d, mModel.getMaxZ() - mModel.getMinZ(), 0.05); 
 				mSkinThickness.setModel(snmodel);
 				mSkinThickness.setEnabled(false);
 				mStrategyModificationTab.add(temp, null);
@@ -408,23 +417,29 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	private Component getMovementTab() {
 		if (mMovementTab == null) {
 			mMovementTab = new JPanel();
-			mMovementTab.setLayout(new GridLayout(2, 1));
+			mMovementTab.setLayout(new GridLayout(3, 1));
 
 			JPanel temp = new JPanel(new BorderLayout());
 			temp.add(new JLabel("free movement heigth"), BorderLayout.EAST);
-			temp.add(freeMovementHeight, BorderLayout.WEST);
+			temp.add(mFreeMovementHeight, BorderLayout.WEST);
 			SpinnerNumberModel snmodel = new SpinnerNumberModel(mModel.getMaxZ() + 5, mModel.getMinZ() - 100, mModel.getMaxZ() + 100, 1); 
-			freeMovementHeight.setModel(snmodel);
+			mFreeMovementHeight.setModel(snmodel);
 			
 			mMovementTab.add(temp);
 
 			JPanel temp2 = new JPanel(new BorderLayout());
-			temp2.add(new JLabel("feed rate(mm/min)"), BorderLayout.EAST);
-			temp2.add(feedRate, BorderLayout.WEST);
-			SpinnerNumberModel frmodel = new SpinnerNumberModel(500, 100, 10000, 10); 
-			feedRate.setModel(frmodel);
-			
+			temp2.add(new JLabel("feed rate while jogging(mm/min)"), BorderLayout.EAST);
+			temp2.add(feedRateMoving, BorderLayout.WEST);
+			SpinnerNumberModel frmodel1 = new SpinnerNumberModel(750, 100, 10000, 10); 
+			feedRateMoving.setModel(frmodel1);
 			mMovementTab.add(temp2);
+
+			JPanel temp3 = new JPanel(new BorderLayout());
+			temp3.add(new JLabel("feed rate while cutting(mm/min)"), BorderLayout.EAST);
+			temp3.add(feedRateCutting, BorderLayout.WEST);
+			SpinnerNumberModel frmodel2 = new SpinnerNumberModel(500, 100, 10000, 10); 
+			feedRateCutting.setModel(frmodel2);
+			mMovementTab.add(temp3);
 		}
 		return mMovementTab;
 	}
@@ -559,8 +574,10 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 * Create the strategy chain of command to execute on the model.
 	 */
 	public IStrategy getStrategy(final GCodeWriterStrategy anOutputStrategy, final IModel aModel) {
-		int feedRateValue = ((SpinnerNumberModel)feedRate.getModel()).getNumber().intValue();
-		anOutputStrategy.setFeedRate(feedRateValue);
+		int feedRateValue1 = ((SpinnerNumberModel)feedRateMoving.getModel()).getNumber().intValue();
+		int feedRateValue2 = ((SpinnerNumberModel)feedRateCutting.getModel()).getNumber().intValue();
+		anOutputStrategy.setMovementFeedRate(feedRateValue1);
+		anOutputStrategy.setCuttingFeedRate(feedRateValue2);
 
 		IStrategy cutStrategy = anOutputStrategy;
 		ZLimitingStrategy zLimitingStep = null;
@@ -569,7 +586,8 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 			cutStrategy = zLimitingStep;
 		}
 
-		double freeMovementHeightValue = ((SpinnerNumberModel)freeMovementHeight.getModel()).getNumber().doubleValue();
+		double skinThicknessValue = ((SpinnerNumberModel)mSkinThickness.getModel()).getNumber().doubleValue();
+		double freeMovementHeightValue = ((SpinnerNumberModel)mFreeMovementHeight.getModel()).getNumber().doubleValue();
 
 		if (mReal5Axis.isSelected()) {
 			// 4. do real 5 axis cutting into real 4 axis cutting
@@ -581,6 +599,10 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		} else {
 			// 3. do fake 4 axis cutting by cutting only straight down
 			cutStrategy = new StraightZCutStrategy(aModel, cutStrategy, getTool(), freeMovementHeightValue);
+		}
+
+		if (mRoughing.isSelected()) {
+			((StraightZCutStrategy)cutStrategy).setSkinThickness(skinThicknessValue);
 		}
 
 		// 1. and 2. move along first and second axis

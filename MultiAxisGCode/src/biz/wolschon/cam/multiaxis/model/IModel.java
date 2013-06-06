@@ -26,7 +26,7 @@ public interface IModel {
 	double getMin(Axis axis);
 	double getMax(Axis axis);
 	SortedSet<Collision> getCollisions(Vector3D resolvedLocation, Vector3D direction);
-	SortedSet<Collision> getCollisions(Vector3D aLocation, Vector3D aDirection, Tool aTool);
+	SortedSet<Collision> getCollisions(Vector3D aLocation, Vector3D aDirection, Tool aTool, double aSkinThickness);
 	public int getTriangleCount();
 	/**
 	 * TODO: abstract from internal representation

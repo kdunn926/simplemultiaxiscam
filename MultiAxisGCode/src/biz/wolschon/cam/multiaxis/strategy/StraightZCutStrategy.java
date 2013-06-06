@@ -33,6 +33,13 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	 * The tool we are cutting with.
 	 */
 	private Tool mTool;
+	/**
+	 * Leave this much model around the cutter in each direction.
+	 * (Used for roughing.)
+	 */
+	private double mSkinThickness;
+
+
 	private IProgressListener mProgressListener;
 	/**
 	 * Z-position that never collides with any part of the object.
@@ -50,6 +57,7 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 		this.mModel = aModel;
 		this.mNext = aNext;
 		this.mTool  = aTool;
+		this.mSkinThickness = 0;
 		this.mFreeMovementHeight = aFreeMovementHeight;
 	}
 
@@ -123,7 +131,7 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 		
 		Vector3D colStartLocation = new Vector3D(aStartLocation[0], aStartLocation[1], aStartLocation[2]);
 		colStartLocation = colStartLocation.subtract(direction.scalarMultiply(100));
-		collisions = getModel().getCollisions(colStartLocation, direction, mTool);
+		collisions = getModel().getCollisions(colStartLocation, direction, mTool, mSkinThickness);
 		}
 		return collisions;
 	}
@@ -216,5 +224,23 @@ public class StraightZCutStrategy implements IStrategy, IProgressListener {
 	 */
 	public void setFreeMovementHeight(final double aFreeMovementHeight) {
 		mFreeMovementHeight = aFreeMovementHeight;
+	}
+
+	/**
+	 * Leave this much model around the cutter in each direction.
+	 * (Used for roughing.)
+	 * @return the skinThickness
+	 */
+	public double getSkinThickness() {
+		return mSkinThickness;
+	}
+
+	/**
+	 * Leave this much model around the cutter in each direction.
+	 * (Used for roughing.)
+	 * @param aSkinThickness the skinThickness to set
+	 */
+	public void setSkinThickness(double aSkinThickness) {
+		mSkinThickness = aSkinThickness;
 	}
 }

@@ -75,15 +75,20 @@ public class GCodeModel extends javax.swing.AbstractListModel {
 	 */
 	private List<GCodeLine> mGCodeLines = new ArrayList<GCodeLine>();
 	/**
-	 * 
+	 * May return null.
 	 * @param anIndex line number starting with 0
 	 * @return Location of every machine axis after performing the given move.
 	 */
 	public double[] getToolLocation(int anIndex) {
 		GCodeLine line = getElementAt(anIndex);
+		if (line == null) {
+			return null;
+		}
 		return line.getToolLocation();
 	}
 	/**
+	 * 
+	 * May return null.
 	 * @param anIndex line number starting with 0
 	 * @return The {@link GCodeLine}.
 	 */

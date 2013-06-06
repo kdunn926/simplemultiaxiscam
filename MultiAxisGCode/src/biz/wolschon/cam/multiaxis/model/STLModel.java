@@ -315,7 +315,7 @@ public class STLModel implements IModel {
 	 */
 	@Override
 	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection) {
-		SortedSet<Collision> collisions = getCollisions(aLocation, aDirection, null);
+		SortedSet<Collision> collisions = getCollisions(aLocation, aDirection, null, 0.0d);
 //		System.out.println("getCollisions location=" + aLocation + " direction=" + aDirection + " => "
 //				+ collisions.size() + " collisions");
 //		for (Collision collision : collisions) {
@@ -328,7 +328,7 @@ public class STLModel implements IModel {
 	 * starting in location and racing of into direction.
 	 */
 	@Override
-	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection, final Tool aTool) {
+	public SortedSet<Collision> getCollisions(final Vector3D aLocation, final Vector3D aDirection, final Tool aTool, final double aSkinThickness) {
 	
 		SortedSet<Collision> result = new TreeSet<Collision>(new Comparator<Collision>() {
 
@@ -348,7 +348,7 @@ public class STLModel implements IModel {
 //TODO: optimize to not test all triangles
 //TODO: parallelize this to multiple processors
 		for (Triangle triangle : this.triangles) {
-			Collision c = checkForCollision(triangle, aLocation, aDirection, aTool);
+			Collision c = checkForCollision(triangle, aLocation, aDirection, aTool, aSkinThickness);
 			if (c != null) {
 				result.add(c);
 			}
@@ -368,7 +368,7 @@ public class STLModel implements IModel {
 	 * @return null or the details of the collision
 	 */
 	protected static Collision checkForCollision(Triangle aTriangle, Vector3D sPosition,
-			Vector3D sDir, final Tool aTool) {
+			Vector3D sDir, final Tool aTool, final double aSkinThickness) {
 		//TODO: rewrite this to use double variables instead of Vector3D to cut down on object allocation and garbage collection
 		//TODO: do the hit-test in FLOAT and if positive, calculate again to have the hit-point as DOUBLE
 
@@ -388,6 +388,7 @@ public class STLModel implements IModel {
 				}  else {
 					hitPointOffset_ = new Vector3D(0, 0, 0);
 				}
+
 				if (shape instanceof BallShape) {
 					BallShape ball = (BallShape) shape;
 					// move the tool up to compensate for the coordinate being of the tip and not the center of the ball
@@ -400,6 +401,7 @@ public class STLModel implements IModel {
 					// "move all triangles sideways" along the component of pNormal that is orthohonal zo sDir to compensate for the cylinder radius
 				}
 				pOrigin = pOrigin.add(hitPointOffset_);
+				pOrigin = pOrigin.add(pNormal.scalarMultiply(aSkinThickness));
 				double d = -1.0d * (pNormal.dotProduct(pOrigin));
 				double num = pNormal.dotProduct(sPosition) + d;
 				double denom = pNormal.dotProduct(sDir);
@@ -422,6 +424,7 @@ public class STLModel implements IModel {
 			// nothing
 		} else {
 			Vector3D pOrigin = aTriangle.getP1();
+			pOrigin = pOrigin.add(pNormal.scalarMultiply(aSkinThickness));
 			double d = -1.0d * (pNormal.dotProduct(pOrigin));
 			double num = pNormal.dotProduct(sPosition) + d;
 			double denom = pNormal.dotProduct(sDir);

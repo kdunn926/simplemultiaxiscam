@@ -15,7 +15,7 @@ public class STLModelTest {
 											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
-		Collision c = STLModel.checkForCollision(triangle, location, direction, null);
+		Collision c = STLModel.checkForCollision(triangle, location, direction, null, 0.0d);
 		assertNotNull(c);
 		assertEquals(0, c.getCollisionPoint().getX(), 0.0001d);
 		assertEquals(0, c.getCollisionPoint().getY(), 0.0001d);
@@ -29,7 +29,7 @@ public class STLModelTest {
 											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
-		Collision c = STLModel.checkForCollision(triangle, location, direction, null);
+		Collision c = STLModel.checkForCollision(triangle, location, direction, null, 0.0d);
 		assertNotNull(c);
 		assertEquals(0.5, c.getCollisionPoint().getX(), 0.0001d);
 		assertEquals(0.75, c.getCollisionPoint().getY(), 0.0001d);
@@ -44,7 +44,7 @@ public class STLModelTest {
 											new Vector3D(1, 1, 0),
 											new Vector3D(0, 0, 0),
 											new Vector3D(0, 1, 0));
-		Collision c = STLModel.checkForCollision(triangle, location, direction, null);
+		Collision c = STLModel.checkForCollision(triangle, location, direction, null, 0.0d);
 		assertNull(c);
 	}
 

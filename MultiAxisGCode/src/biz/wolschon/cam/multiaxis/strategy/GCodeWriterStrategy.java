@@ -19,20 +19,35 @@ public class GCodeWriterStrategy implements IStrategy {
 
 	private IProgressListener mProgressListener;
 
-	private int mFeedRate;
+	private int mMovementFeedRate;
+	private int mCuttingFeedRate;
 
 	/**
 	 * @return the feedRate
 	 */
-	public int getFeedRate() {
-		return mFeedRate;
+	public int getMovementFeedRate() {
+		return mMovementFeedRate;
 	}
 
 	/**
 	 * @param aFeedRate the feedRate to set
 	 */
-	public void setFeedRate(int aFeedRate) {
-		mFeedRate = aFeedRate;
+	public void setMovementFeedRate(int aMovementFeedRate) {
+		mMovementFeedRate = aMovementFeedRate;
+	}
+
+	/**
+	 * @return the feedRate
+	 */
+	public int getCuttingFeedRate() {
+		return mCuttingFeedRate;
+	}
+
+	/**
+	 * @param aFeedRate the feedRate to set
+	 */
+	public void setCuttingFeedRate(int aCuttingFeedRate) {
+		mCuttingFeedRate = aCuttingFeedRate;
 	}
 
 	/**
@@ -70,10 +85,10 @@ public class GCodeWriterStrategy implements IStrategy {
 		if (!isCutting) {
 			// if repositioning, first raise Z
 			sb.append("G1 Z").append(formatCoordinate(aNextToolLocation[2]));
-			sb.append(" F" + this.mFeedRate + "\n"); //TODO: get speeds from strategies
+			sb.append(" F" + getMovementFeedRate() + "\n"); //TODO: get speeds from strategies
 			writeCodeLine(sb.toString(), aNextToolLocation);
 
-			System.err.print(sb.toString()); //TODO: debug output
+			System.out.print(sb.toString()); //TODO: debug output
 			sb = new StringBuilder();
 		}
 		sb.append("G1 X").append(formatCoordinate(aNextToolLocation[0]));
@@ -85,7 +100,11 @@ public class GCodeWriterStrategy implements IStrategy {
 		if (aNextToolLocation.length > 4) {
 			sb.append(" B").append(formatCoordinate(aNextToolLocation[4]));
 		}
-		sb.append(" F100\n"); //TODO: get speeds from strategies
+		if (!isCutting) {
+			sb.append(" F" + getMovementFeedRate() + "\n"); //TODO: get speeds from strategies
+		} else {
+			sb.append(" F" + getCuttingFeedRate() + "\n"); //TODO: get speeds from strategies
+		}
 		writeCodeLine(sb.toString(), aNextToolLocation);
 		
 		System.out.print(sb.toString()); //TODO: debug output
