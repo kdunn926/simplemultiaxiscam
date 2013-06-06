@@ -1,6 +1,7 @@
 package biz.wolschon.cam.multiaxis.views;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -59,11 +60,13 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 */
 	private JCheckBox mReal5Axis;
 	private JSpinner freeMovementHeight = new JSpinner();
+	private JSpinner feedRate = new JSpinner();
 	/**
 	 * List to select a tool from.<br/>
 	 * Uppon selecting the tool #onToolSelected() takes care of displaying the UI for it's parameters
 	 */
 	private JList mTools;
+	private JPanel mToolTab;
 	/**
 	 * List to select a strategy from.<br/>
 	 * Uppon selecting the strategy #onStrategySelected() takes care of displaying the UI for it's parameters
@@ -289,7 +292,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 			return retval;
 		}
 	};
-	private JPanel mainPanel;
+	private JTabbedPane mainPanel;
 	/**
 	 * Create the panel.
 	 */
@@ -303,6 +306,8 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 * Used to implement selection of segments.
 	 */
 	private ModelReviewPanel mReviewTab;
+	private JPanel mMovementTab;
+	private JPanel mStrategyModificationPanel;
 	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository, final IModel aModel, final ModelReviewPanel aReviewTab) {
 		this.mLabel = aLabel;
 		this.mModel = aModel;
@@ -310,14 +315,91 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		this.mReviewTab.setSegment(mSegment);
 		this.mToolRepository = aToolRepository;
 		setLayout(new BorderLayout());
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(8, 1));
+		mainPanel = new JTabbedPane();
 		add(mainPanel, BorderLayout.CENTER);
-		
-		mParameterSettings = new JTabbedPane(JTabbedPane.TOP);
-		add(mParameterSettings, BorderLayout.SOUTH);
+
 
 		//-------------- tool
+		mainPanel.addTab("Tool", new JScrollPane(getToolTab()));
+		mainPanel.addTab("Segment", getSegmentPanel());		
+		mainPanel.addTab("movement", getMovementTab());
+		mainPanel.addTab("basic strategy", new JScrollPane(getStrategySelectionTab()));
+		mainPanel.addTab("strategy modification", new JScrollPane(getStrategyModificationPanel()));
+		onStrategyChanged(PARALLEL); // adds the "strategy settings" tab
+	}
+
+	private Component getStrategySelectionTab() {
+		if (mStrategies == null) {
+			//-------------- strategy
+			//TODO: add waterline strategy
+			mStrategies = new JList(new StrategySelection[] {PARALLEL, CROSSWISE});
+			mStrategies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			mStrategies.addListSelectionListener(new ListSelectionListener() {
+				
+				@Override
+				public void valueChanged(ListSelectionEvent arg0) {
+					StrategySelection s = (StrategySelection) mStrategies.getSelectedValue();
+					onStrategyChanged(s);
+					
+				}
+			});
+			mStrategies.setSelectedValue(PARALLEL, true);
+			mStrategies.setVisibleRowCount(1);
+		}
+		return mStrategies;
+	}
+
+	private Component getStrategyModificationPanel() {
+		if (mStrategyModificationPanel == null) {
+			mStrategyModificationPanel = new JPanel();
+			mStrategyModificationPanel.setLayout(new GridLayout(3, 1));
+
+			mStrategyModificationPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);
+
+			mReal4Axis = new JCheckBox("follow A axis surface normal using Y");
+			mReal4Axis.setSelected(true);
+			mStrategyModificationPanel.add(mReal4Axis, null);
+			
+			mReal5Axis = new JCheckBox("follow B axis surface normal using X");
+			mReal5Axis.setSelected(false);
+			mReal5Axis.setEnabled(false);
+			mStrategyModificationPanel.add(mReal5Axis, null);
+		}
+		return mStrategyModificationPanel;
+	}
+
+	private Component getMovementTab() {
+		if (mMovementTab == null) {
+			mMovementTab = new JPanel();
+			mMovementTab.setLayout(new GridLayout(2, 1));
+
+			JPanel temp = new JPanel(new BorderLayout());
+			temp.add(new JLabel("free movement heigth"), BorderLayout.EAST);
+			temp.add(freeMovementHeight, BorderLayout.WEST);
+			SpinnerNumberModel snmodel = new SpinnerNumberModel(mModel.getMaxZ() + 5, mModel.getMinZ() - 100, mModel.getMaxZ() + 100, 1); 
+			freeMovementHeight.setModel(snmodel);
+			
+			mMovementTab.add(temp);
+
+			JPanel temp2 = new JPanel(new BorderLayout());
+			temp2.add(new JLabel("feed rate(mm/min)"), BorderLayout.EAST);
+			temp2.add(feedRate, BorderLayout.WEST);
+			SpinnerNumberModel frmodel = new SpinnerNumberModel(500, 100, 10000, 10); 
+			feedRate.setModel(frmodel);
+			
+			mMovementTab.add(temp2);
+		}
+		return mMovementTab;
+	}
+
+	private Component getToolTab() {
+		if (mToolTab != null) {
+			return mToolTab;
+		}
+		JPanel mToolTab = new JPanel();
+		mToolTab.setLayout(new BorderLayout());
+		mToolTab.add(new JLabel("[---] tool RPM"), BorderLayout.SOUTH);
+
 		final DefaultListModel model = new DefaultListModel();
 		for (Tool tool : mToolRepository.getAllTools()) {
 			model.addElement(tool);
@@ -365,51 +447,11 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 				
 			}
 		});
-		mainPanel.add(new JScrollPane(mTools), null);
 		mTools.setSelectedIndex(0);
 		mTools.setVisibleRowCount(1);
 
-		mainPanel.add(new JLabel("[---] tool RPM"), null);
-		mainPanel.add(getSegmentPanel(), null);
-
-		//-------------- strategy
-		//TODO: add waterline strategy
-		mStrategies = new JList(new StrategySelection[] {PARALLEL, CROSSWISE});
-		mStrategies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		mStrategies.addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent arg0) {
-				StrategySelection s = (StrategySelection) mStrategies.getSelectedValue();
-				onStrategyChanged(s);
-				
-			}
-		});
-		mainPanel.add(new JScrollPane(mStrategies), null);
-		mStrategies.setSelectedValue(PARALLEL, true);
-		mStrategies.setVisibleRowCount(1);
-		onStrategyChanged(PARALLEL);
-
-		mainPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);
-
-		mReal4Axis = new JCheckBox("follow A axis surface normal using Y");
-		mReal4Axis.setSelected(true);
-		mainPanel.add(mReal4Axis, null);
-		
-		mReal5Axis = new JCheckBox("follow B axis surface normal using X");
-		mReal5Axis.setSelected(false);
-		mReal5Axis.setEnabled(false);
-		mainPanel.add(mReal5Axis, null);
-		
-
-		SpinnerNumberModel snmodel = new SpinnerNumberModel(mModel.getMaxZ() + 5, mModel.getMinZ() - 100, mModel.getMaxZ() + 100, 1); 
-		freeMovementHeight.setModel(snmodel);
-		JPanel temp = new JPanel(new BorderLayout());
-		temp.add(new JLabel("free movement heigth"), BorderLayout.EAST);
-		temp.add(freeMovementHeight, BorderLayout.WEST);
-		mainPanel.add(temp, null);
-
-		
+		mToolTab.add(mTools, BorderLayout.CENTER);
+		return mToolTab;
 	}
 
 	/**
@@ -465,11 +507,11 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 */
 	private void onStrategyChanged(final StrategySelection aStrategySelection) {
 		if (mStrategyPanel != null) {
-			mParameterSettings.remove(mStrategyPanel);
+			mainPanel.remove(mStrategyPanel);
 			mStrategyPanel = null;
 		}
 		mStrategyPanel = (StrategySelection) aStrategySelection.getPanel();
-		mParameterSettings.addTab("strategy settings", mStrategyPanel);
+		mainPanel.addTab("strategy settings", mStrategyPanel);
 		invalidate();
 	}
 
@@ -480,8 +522,12 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 * Create the strategy chain of command to execute on the model.
 	 */
 	public IStrategy getStrategy(final GCodeWriterStrategy anOutputStrategy, final IModel aModel) {
+		int feedRateValue = ((SpinnerNumberModel)feedRate.getModel()).getNumber().intValue();
+		anOutputStrategy.setFeedRate(feedRateValue);
+
 		IStrategy cutStrategy = anOutputStrategy;
 		double freeMovementHeightValue = ((SpinnerNumberModel)freeMovementHeight.getModel()).getNumber().doubleValue();
+
 		if (mReal5Axis.isSelected()) {
 			// 4. do real 5 axis cutting into real 4 axis cutting
 			cutStrategy = new FollowSurfaceNormalCutStrategy(aModel, Axis.B, cutStrategy, getTool(), freeMovementHeightValue);

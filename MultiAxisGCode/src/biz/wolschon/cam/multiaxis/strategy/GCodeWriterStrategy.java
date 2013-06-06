@@ -19,6 +19,22 @@ public class GCodeWriterStrategy implements IStrategy {
 
 	private IProgressListener mProgressListener;
 
+	private int mFeedRate;
+
+	/**
+	 * @return the feedRate
+	 */
+	public int getFeedRate() {
+		return mFeedRate;
+	}
+
+	/**
+	 * @param aFeedRate the feedRate to set
+	 */
+	public void setFeedRate(int aFeedRate) {
+		mFeedRate = aFeedRate;
+	}
+
 	/**
 	 * Number format to use for G-Code.
 	 */
@@ -54,7 +70,7 @@ public class GCodeWriterStrategy implements IStrategy {
 		if (!isCutting) {
 			// if repositioning, first raise Z
 			sb.append("G1 Z").append(formatCoordinate(aNextToolLocation[2]));
-			sb.append(" F100\n"); //TODO: get speeds from strategies
+			sb.append(" F" + this.mFeedRate + "\n"); //TODO: get speeds from strategies
 			writeCodeLine(sb.toString(), aNextToolLocation);
 
 			System.err.print(sb.toString()); //TODO: debug output
