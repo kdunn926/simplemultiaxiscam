@@ -620,4 +620,9 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	public String toString() {
 		return mLabel;
 	}
+
+	public void setRoughing(boolean aB) {
+		getStrategyModificationTab();
+		mRoughing.setSelected(aB);		
+	}
 }

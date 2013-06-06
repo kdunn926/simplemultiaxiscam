@@ -96,8 +96,12 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 
 		contentPane2.add(getModelReviewTab(aModel), JSplitPane.TOP);
 
-		onStrategyStepChanged(new StrategyCreationPanel("roughing", mTools, aModel, getModelReviewTab(aModel)));
-		mStrategySteps.addStrategyStep(mCurrentStrategyTab);
+		StrategyCreationPanel roughingStep = new StrategyCreationPanel("roughing", mTools, aModel, getModelReviewTab(aModel));
+		StrategyCreationPanel finishingStep = new StrategyCreationPanel("finishing", mTools, aModel, getModelReviewTab(aModel));
+		mStrategySteps.addStrategyStep(roughingStep);
+		mStrategySteps.addStrategyStep(finishingStep);
+		//onStrategyStepChanged(finishingStep);
+		roughingStep.setRoughing(true);
 
 		mGCodeTab = new GCodePanel(aModel, getModelReviewTab(aModel), mStrategySteps);
 		contentPane2.add(mGCodeTab, JSplitPane.BOTTOM);
@@ -136,6 +140,8 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		if (mCurrentStrategyTab != null) {
 			mLeftPane.add(mCurrentStrategyTab, BorderLayout.CENTER);
 			mCurrentStrategyTab.setBorder(new TitledBorder(null, aStep.toString(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			invalidate();
+			repaint();
 		}
 	}
 }
