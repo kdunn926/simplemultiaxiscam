@@ -307,7 +307,10 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 	 */
 	private ModelReviewPanel mReviewTab;
 	private JPanel mMovementTab;
-	private JPanel mStrategyModificationPanel;
+	private JPanel mStrategyModificationTab;
+	private JCheckBox mRoughing;
+	private JSpinner mLayerHeight;
+	private JSpinner mSkinThickness;
 	public StrategyCreationPanel (final String aLabel, final ToolRepository aToolRepository, final IModel aModel, final ModelReviewPanel aReviewTab) {
 		this.mLabel = aLabel;
 		this.mModel = aModel;
@@ -324,7 +327,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		mainPanel.addTab("Segment", getSegmentPanel());		
 		mainPanel.addTab("movement", getMovementTab());
 		mainPanel.addTab("basic strategy", new JScrollPane(getStrategySelectionTab()));
-		mainPanel.addTab("strategy modification", new JScrollPane(getStrategyModificationPanel()));
+		mainPanel.addTab("strategy modification", new JScrollPane(getStrategyModificationTab()));
 		onStrategyChanged(PARALLEL); // adds the "strategy settings" tab
 	}
 
@@ -349,23 +352,56 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		return mStrategies;
 	}
 
-	private Component getStrategyModificationPanel() {
-		if (mStrategyModificationPanel == null) {
-			mStrategyModificationPanel = new JPanel();
-			mStrategyModificationPanel.setLayout(new GridLayout(3, 1));
+	private Component getStrategyModificationTab() {
+		if (mStrategyModificationTab == null) {
+			mStrategyModificationTab = new JPanel();
+			mStrategyModificationTab.setLayout(new GridLayout(5, 1));
 
-			mStrategyModificationPanel.add(new JLabel("[finishing step, no layers, 0mm skin] layers"), null);
+			mRoughing = new JCheckBox("roughing");
+			mRoughing.setSelected(false);
+			mRoughing.setEnabled(false); //TODO: Roughing not yet implemented
+			mStrategyModificationTab.add(mRoughing, null);
+			mRoughing.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent aArg0) {
+					mLayerHeight.setEnabled(mRoughing.isSelected());
+					mSkinThickness.setEnabled(mRoughing.isSelected());
+				}
+			});
+	
+			mLayerHeight = new JSpinner();
+			{
+				JPanel temp = new JPanel(new BorderLayout());
+				temp.add(new JLabel("layer height"), BorderLayout.EAST);
+				temp.add(mLayerHeight, BorderLayout.CENTER);
+				SpinnerNumberModel snmodel = new SpinnerNumberModel(1.0d, 0.0001d, mModel.getMaxZ() - mModel.getMinZ(), 0.05d); 
+				mLayerHeight.setModel(snmodel);
+				mLayerHeight.setEnabled(false);
+				mStrategyModificationTab.add(temp, null);
+			}
+	
+			mSkinThickness = new JSpinner();
+			{
+				JPanel temp = new JPanel(new BorderLayout());
+				temp.add(new JLabel("skin thickness"), BorderLayout.EAST);
+				temp.add(mSkinThickness, BorderLayout.CENTER);
+				SpinnerNumberModel snmodel = new SpinnerNumberModel(0.4d, 0.0001, mModel.getMaxZ() - mModel.getMinZ(), 0.05); 
+				mSkinThickness.setModel(snmodel);
+				mSkinThickness.setEnabled(false);
+				mStrategyModificationTab.add(temp, null);
+			}
 
 			mReal4Axis = new JCheckBox("follow A axis surface normal using Y");
 			mReal4Axis.setSelected(true);
-			mStrategyModificationPanel.add(mReal4Axis, null);
+			mStrategyModificationTab.add(mReal4Axis, null);
 			
 			mReal5Axis = new JCheckBox("follow B axis surface normal using X");
 			mReal5Axis.setSelected(false);
-			mReal5Axis.setEnabled(false);
-			mStrategyModificationPanel.add(mReal5Axis, null);
+			mReal5Axis.setEnabled(false);  // NOT YET IMPLEMENTED
+			mStrategyModificationTab.add(mReal5Axis, null);
 		}
-		return mStrategyModificationPanel;
+		return mStrategyModificationTab;
 	}
 
 	private Component getMovementTab() {
