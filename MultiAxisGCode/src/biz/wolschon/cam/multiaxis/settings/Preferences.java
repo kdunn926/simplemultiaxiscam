@@ -73,4 +73,9 @@ public class Preferences {
 	protected File getPreferencesFile() {
 		return new File (new File(System.getProperty("user.home"), ".MultiAxisGCode"), "MultiAxisGCode.properties");
 	}
+
+	public void setToolsDirectory(final File aFile) {
+		myPreferences.setProperty(TOOLS_DIR, aFile.getAbsolutePath());
+		
+	}
 }
