@@ -3,11 +3,17 @@ package biz.wolschon.cam.multiaxis.views;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.MenuBar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.Serializable;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -19,12 +25,14 @@ import biz.wolschon.cam.multiaxis.views.StrategyStepsPanel.CurrentStrategyStepLi
 
 import javax.swing.border.TitledBorder;
 
-public class MainFrame extends JFrame implements CurrentStrategyStepListener {
+public class MainFrame extends JFrame implements CurrentStrategyStepListener, ActionListener {
 
 	/**
 	 * For {@link Serializable}.
 	 */
 	private static final long serialVersionUID = -582634794848211670L;
+	private static final String ACTION_SETTINGS = "settings";
+	private static final String ACTION_EXIT = "exit";
 	private JSplitPane contentPane;
 	private JPanel mLeftPane;
 	private ToolRepository mTools = new ToolRepository(new Preferences());
@@ -77,6 +85,7 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 	 */
 	private GCodePanel mGCodeTab;
 	private StrategyStepsPanel mStrategySteps;
+	private JMenuBar mMenu;
 	/**
 	 * Create the frame.
 	 */
@@ -110,6 +119,30 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 		
 		contentPane2.setDividerLocation(0.2);
 		contentPane.setDividerLocation(0.3);
+
+		setJMenuBar(getMenu());
+	}
+
+	private JMenuBar getMenu() {
+		if (this.mMenu == null) {
+			this.mMenu = new JMenuBar();
+			JMenu file = new JMenu("File");
+			JMenu settings = new JMenu("Settings");
+
+			JMenuItem preferences = new JMenuItem("Preferences");
+			preferences.setActionCommand(ACTION_SETTINGS);
+			preferences.addActionListener(this);
+			settings.add(preferences);
+			
+			JMenuItem exit = new JMenuItem("Exit");
+			exit.setActionCommand(ACTION_EXIT);
+			exit.addActionListener(this);
+			file.add(exit);
+
+			this.mMenu.add(file);
+			this.mMenu.add(settings);
+		}
+		return this.mMenu;
 	}
 
 	/**
@@ -142,6 +175,18 @@ public class MainFrame extends JFrame implements CurrentStrategyStepListener {
 			mCurrentStrategyTab.setBorder(new TitledBorder(null, aStep.toString(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			invalidate();
 			repaint();
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent anEvent) {
+		if (anEvent.getActionCommand().equals(ACTION_SETTINGS)) {
+			SettingsDialog dlg = new SettingsDialog(this);
+			dlg.pack();
+			dlg.setVisible(true);
+		}
+		if (anEvent.getActionCommand().equals(ACTION_EXIT)) {
+			System.exit(0);
 		}
 	}
 }
