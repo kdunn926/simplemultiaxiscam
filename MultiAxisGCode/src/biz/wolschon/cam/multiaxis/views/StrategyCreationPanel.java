@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
@@ -33,6 +34,7 @@ import biz.wolschon.cam.multiaxis.strategy.GCodeWriterStrategy;
 import biz.wolschon.cam.multiaxis.strategy.IStrategy;
 import biz.wolschon.cam.multiaxis.strategy.LayerStrategy;
 import biz.wolschon.cam.multiaxis.strategy.LinearStrategy;
+import biz.wolschon.cam.multiaxis.strategy.PostprocessStrategy;
 import biz.wolschon.cam.multiaxis.strategy.StraightZCutStrategy;
 import biz.wolschon.cam.multiaxis.strategy.ZLimitingStrategy;
 import biz.wolschon.cam.multiaxis.tools.Tool;
@@ -139,7 +141,43 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		 */
 		public abstract Collection<Axis> getLimitableAxes();
 	};
+	/**
+	 * A postprocessing strategy acting on existing g-code files.
+	 */
+	private final StrategySelection POSTPROCESS = new StrategySelection("Postprocess") {
+		/**
+		 * For {@link Serializable}.
+		 */
+		private static final long serialVersionUID = -7480187585759638514L;
+		private JTextField sourceFile 	= new JTextField("/tmp/input.gcode");
+		private boolean initialized = false;
+		@Override
+		public JPanel getPanel() {
+			if (initialized) {
+				return this;
+			}
+			initialized = true;
+			JPanel panel = this;
+			panel.setLayout(new GridLayout(1, 2));
 
+			panel.add(new JLabel("source file:"), null);
+			panel.add(new JScrollPane(sourceFile), null);
+			return panel;
+		}
+		public IStrategy getStrategy(final IModel aModel, final IStrategy aNextStrategy) {
+			String filename = sourceFile.getText();
+			File file = new File(filename);
+			PostprocessStrategy strategy = new PostprocessStrategy(file);
+			return strategy;
+		}
+		/**
+		 * @return The list of axes that can be part of a Segment {@link Limit}.
+		 */
+		public Collection<Axis> getLimitableAxes() {
+			Collection<Axis> retval = new Vector<Axis>();
+			return retval;
+		}
+	};
 	/**
 	 * A parallel strategy moving along 2 axis.
 	 */
@@ -346,7 +384,7 @@ public class StrategyCreationPanel extends JPanel implements ISegmentSelectionLi
 		if (mStrategies == null) {
 			//-------------- strategy
 			//TODO: add waterline strategy
-			mStrategies = new JList(new StrategySelection[] {PARALLEL, CROSSWISE});
+			mStrategies = new JList(new StrategySelection[] {PARALLEL, CROSSWISE, POSTPROCESS});
 			mStrategies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			mStrategies.addListSelectionListener(new ListSelectionListener() {
 				
